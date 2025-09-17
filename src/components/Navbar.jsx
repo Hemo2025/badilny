@@ -89,9 +89,9 @@ export default function Navbar() {
     >
       <Link
         to="/"
-        style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#facc15" }}
+        style={{ fontWeight: "bold", fontSize: "1.5rem", color: "#facc15" }}
       >
-        Baddel Li
+        Badilny
       </Link>
 
       <div
