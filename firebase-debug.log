@@ -1,0 +1,122 @@
+[debug] [2025-09-16T02:01:25.421Z] ----------------------------------------------------------------------
+[debug] [2025-09-16T02:01:25.426Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EBDA3 SOFT\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2025-09-16T02:01:25.426Z] CLI Version:   14.16.0
+[debug] [2025-09-16T02:01:25.427Z] Platform:      win32
+[debug] [2025-09-16T02:01:25.427Z] Node Version:  v22.19.0
+[debug] [2025-09-16T02:01:25.427Z] Time:          Tue Sep 16 2025 05:01:25 GMT+0300 (التوقيت العربي الرسمي)
+[debug] [2025-09-16T02:01:25.428Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-16T02:01:25.438Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-16T02:01:25.439Z] > authorizing via signed-in user (hammam.buss@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  E:\moqayda
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-09-16T02:02:36.260Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:36.262Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:36.265Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2025-09-16T02:02:37.034Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-09-16T02:02:37.034Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project baddel-li (Baddel Li) 
+[info] 
+=== Dataconnect Setup
+[debug] [2025-09-16T02:02:44.208Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:44.208Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:44.209Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/baddel-li/billingInfo [none]
+[debug] [2025-09-16T02:02:45.274Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/baddel-li/billingInfo 200
+[debug] [2025-09-16T02:02:45.275Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/baddel-li/billingInfo {"name":"projects/baddel-li/billingInfo","projectId":"baddel-li","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API firebasedataconnect.googleapis.com is enabled... 
+[debug] [2025-09-16T02:02:45.281Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:45.281Z] Checked if tokens are valid: true, expires at: 1757991604567
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2025-09-16T02:02:45.285Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:45.286Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:45.286Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-09-16T02:02:45.287Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/baddel-li
+[debug] [2025-09-16T02:02:45.292Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com [none]
+[debug] [2025-09-16T02:02:45.292Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com x-goog-quota-user=projects/baddel-li
+[debug] [2025-09-16T02:02:46.476Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-09-16T02:02:46.477Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com [omitted]
+[warn] !  dataconnect: missing required API firebasedataconnect.googleapis.com. Enabling now... 
+[debug] [2025-09-16T02:02:46.484Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:46.484Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:46.485Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com:enable [none]
+[debug] [2025-09-16T02:02:46.485Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com:enable x-goog-quota-user=projects/baddel-li
+[debug] [2025-09-16T02:02:46.501Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com 200
+[debug] [2025-09-16T02:02:46.501Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com [omitted]
+[warn] !  dataconnect: missing required API sqladmin.googleapis.com. Enabling now... 
+[debug] [2025-09-16T02:02:46.502Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:46.502Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:46.503Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com:enable [none]
+[debug] [2025-09-16T02:02:46.503Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com:enable x-goog-quota-user=projects/baddel-li
+[debug] [2025-09-16T02:02:47.199Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com:enable 200
+[debug] [2025-09-16T02:02:47.200Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/firebasedataconnect.googleapis.com:enable [omitted]
+[debug] [2025-09-16T02:02:47.728Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com:enable 200
+[debug] [2025-09-16T02:02:47.728Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/baddel-li/services/sqladmin.googleapis.com:enable [omitted]
+[debug] [2025-09-16T02:02:57.759Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:57.760Z] Checked if tokens are valid: true, expires at: 1757991604567
+[debug] [2025-09-16T02:02:57.760Z] >>> [apiv2][query] GET https://firebasedataconnect.googleapis.com/v1/projects/baddel-li/locations/-/services [none]
+[debug] [2025-09-16T02:02:59.887Z] <<< [apiv2][status] GET https://firebasedataconnect.googleapis.com/v1/projects/baddel-li/locations/-/services 200
+[debug] [2025-09-16T02:02:59.887Z] <<< [apiv2][body] GET https://firebasedataconnect.googleapis.com/v1/projects/baddel-li/locations/-/services {}
+[info] i  Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
+[debug] [2025-09-16T02:03:15.966Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (C:\Users\EBDA3 SOFT\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\@inquirer\core\dist\commonjs\lib\create-prompt.js:101:37)
+    at Interface.emit (node:events:519:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1132:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:271:20)
+    at ReadStream.emit (node:events:531:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:370:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-09-16T02:03:27.016Z] ----------------------------------------------------------------------
+[debug] [2025-09-16T02:03:27.022Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EBDA3 SOFT\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2025-09-16T02:03:27.023Z] CLI Version:   14.16.0
+[debug] [2025-09-16T02:03:27.023Z] Platform:      win32
+[debug] [2025-09-16T02:03:27.023Z] Node Version:  v22.19.0
+[debug] [2025-09-16T02:03:27.024Z] Time:          Tue Sep 16 2025 05:03:27 GMT+0300 (التوقيت العربي الرسمي)
+[debug] [2025-09-16T02:03:27.024Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-16T02:03:27.035Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-16T02:03:27.036Z] > authorizing via signed-in user (hammam.buss@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  E:\moqayda
+
+[debug] [2025-09-16T02:08:02.231Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (C:\Users\EBDA3 SOFT\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\@inquirer\core\dist\commonjs\lib\create-prompt.js:101:37)
+    at Interface.emit (node:events:519:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1132:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:271:20)
+    at ReadStream.emit (node:events:531:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:370:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.
