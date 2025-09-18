@@ -9,10 +9,10 @@ export default function Home() {
         <h1
           style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1rem" }}
         >
-          مرحباً بك في موقع بدّل لي
+          مرحباً بك في موقع بادلني 
         </h1>
         <p style={{ fontSize: "1rem", color: "#d1d5db" }}>
-          ابدأ بتصفح الأغراض وبدّلها بسهولة!
+          ابدأ بتصفح الأغراض وبادلها بسهولة!
         </p>
       </div>
     </PageWrapper>
