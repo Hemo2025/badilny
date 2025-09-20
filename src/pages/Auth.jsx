@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export default function Auth() {
   const [isSignup, setIsSignup] = useState(false);
@@ -14,12 +15,11 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [showNameInput, setShowNameInput] = useState(false);
   const [newUser, setNewUser] = useState(null);
-  const [message, setMessage] = useState(null); // رسالة جذابة
+  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || "/";
 
-  // لإخفاء الرسالة تلقائياً بعد 3 ثواني
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => setMessage(null), 3000);
@@ -34,6 +34,20 @@ export default function Auth() {
         email,
         password
       );
+      const user = userCredential.user;
+
+      // تحقق من وجود المستخدم في مجموعة users
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          displayName: user.displayName || "مستخدم",
+          email: user.email,
+          createdAt: new Date(),
+        });
+      }
+
       setMessage({ type: "success", text: "تم تسجيل الدخول بنجاح!" });
       navigate(from);
     } catch (error) {
@@ -59,6 +73,15 @@ export default function Auth() {
     if (name.trim() && newUser) {
       try {
         await updateProfile(newUser, { displayName: name.trim() });
+
+        // أضف المستخدم لمجموعة users
+        await setDoc(doc(db, "users", newUser.uid), {
+          uid: newUser.uid,
+          displayName: name.trim(),
+          email: newUser.email,
+          createdAt: new Date(),
+        });
+
         setMessage({ type: "success", text: "تم حفظ الاسم بنجاح!" });
         navigate(from);
       } catch (error) {

@@ -16,34 +16,30 @@ export default function Navbar() {
       setUser(currentUser);
 
       if (currentUser) {
-        // عداد طلبات المقايضة
         const tradesQuery = query(
           collection(db, "trades"),
           where("ownerId", "==", currentUser.uid),
           where("status", "==", "pending")
         );
+
         const unsubscribeTrades = onSnapshot(tradesQuery, (snapshot) => {
           setPendingTrades(snapshot.docs.length);
         });
 
-        // عداد الرسائل الجديدة
-        const chatsQuery = query(
-          collection(db, "trades"),
+        const messagesQuery = query(
+          collection(db, "messages"),
           where("participants", "array-contains", currentUser.uid)
         );
-        const unsubscribeChats = onSnapshot(chatsQuery, (snapshot) => {
+
+        const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
           let count = 0;
           snapshot.docs.forEach((docSnap) => {
             const data = docSnap.data();
-            // التأكد من أن messages موجودة ومصفوفة
-            const messages = Array.isArray(data.messages) ? data.messages : [];
-            if (data.chatId) {
-              const unread = messages.filter(
-                (msg) =>
-                  msg.senderId !== currentUser.uid &&
-                  !(msg.read && msg.read[currentUser.uid])
-              );
-              count += unread.length;
+            if (
+              !data.readBy?.includes(currentUser.uid) &&
+              data.senderId !== currentUser.uid
+            ) {
+              count++;
             }
           });
           setUnreadChats(count);
@@ -51,7 +47,7 @@ export default function Navbar() {
 
         return () => {
           unsubscribeTrades();
-          unsubscribeChats();
+          unsubscribeMessages();
         };
       }
     });
@@ -125,7 +121,6 @@ export default function Navbar() {
           </Link>
         )}
 
-        {/* زر المقايضات مع العداد */}
         {user && (
           <button
             onClick={() => navigate("/traderequests")}
@@ -160,7 +155,6 @@ export default function Navbar() {
           </button>
         )}
 
-        {/* زر الدردشات مع العداد */}
         {user && (
           <button
             onClick={() => navigate("/chatslist")}
@@ -200,7 +194,6 @@ export default function Navbar() {
             تسجيل الخروج
           </button>
         )}
-
         {!user && (
           <button onClick={handleLoginRedirect} style={buttonStyle}>
             تسجيل الدخول
