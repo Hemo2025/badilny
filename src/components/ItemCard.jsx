@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { auth, db } from "../firebase";
 import {
   collection,
@@ -14,8 +14,10 @@ export default function ItemCard({ item }) {
   const [myItems, setMyItems] = useState([]);
   const [showTradeForm, setShowTradeForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [toastMessage, setToastMessage] = useState(""); // ← رسالة الإشعار
-  const [showToast, setShowToast] = useState(false); // ← للتحكم بعرض الإشعار
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const tradeFormRef = useRef(null);
+  const tradeButtonRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -38,19 +40,33 @@ export default function ItemCard({ item }) {
       }
     });
 
-    return () => unsubscribe();
+    // إغلاق Trade Form عند الضغط خارجها أو خارج الزر
+    const handleClickOutside = (e) => {
+      if (
+        tradeFormRef.current &&
+        !tradeFormRef.current.contains(e.target) &&
+        tradeButtonRef.current &&
+        !tradeButtonRef.current.contains(e.target)
+      ) {
+        setShowTradeForm(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const showToastMsg = (msg) => {
     setToastMessage(msg);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000); // الإشعار يختفي بعد 3 ثواني
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handleTradeRequest = async () => {
     if (!user) return showToastMsg("يجب تسجيل الدخول!");
-    if (!selectedItem)
-      return showToastMsg("اختر غرضك أولاً أو قم بإضافة غرضك!");
+    if (!selectedItem) return showToastMsg("اختر غرضك أولاً!");
 
     try {
       await addDoc(collection(db, "trades"), {
@@ -84,7 +100,6 @@ export default function ItemCard({ item }) {
         position: "relative",
       }}
     >
-      {/* الإشعار */}
       {showToast && <div style={toastStyle}>{toastMessage}</div>}
 
       <img
@@ -108,50 +123,58 @@ export default function ItemCard({ item }) {
       {user && item.userId !== user.uid && (
         <>
           <button
-            onClick={() => setShowTradeForm(!showTradeForm)}
+            ref={tradeButtonRef}
+            onClick={() => setShowTradeForm((prev) => !prev)}
             style={tradeButtonStyle}
           >
             أرغب بالمقايضة
           </button>
 
-          {showTradeForm && (
-            <div style={tradeFormStyle}>
-              {myItems.map((myItem) => (
-                <div
-                  key={myItem.id}
-                  onClick={() => setSelectedItem(myItem.id)}
+          <div
+            ref={tradeFormRef}
+            style={{
+              ...tradeFormStyle,
+              maxHeight: showTradeForm ? "500px" : "0px",
+              opacity: showTradeForm ? 1 : 0,
+              transition: "all 0.3s ease",
+              overflow: "hidden",
+            }}
+          >
+            {myItems.map((myItem) => (
+              <div
+                key={myItem.id}
+                onClick={() => setSelectedItem(myItem.id)}
+                style={{
+                  padding: "0.5rem",
+                  borderRadius: "0.5rem",
+                  background:
+                    selectedItem === myItem.id ? "#facc15" : "#111827",
+                  color: "#fff",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "0.2s",
+                }}
+              >
+                <img
+                  src={myItem.image}
+                  alt={myItem.name}
                   style={{
-                    padding: "0.5rem",
-                    borderRadius: "0.5rem",
-                    background:
-                      selectedItem === myItem.id ? "#facc15" : "#111827",
-                    color: "#fff",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    transition: "0.2s",
+                    width: "100%",
+                    height: "80px",
+                    objectFit: "cover",
+                    borderRadius: "0.3rem",
                   }}
-                >
-                  <img
-                    src={myItem.image}
-                    alt={myItem.name}
-                    style={{
-                      width: "100%",
-                      height: "80px",
-                      objectFit: "cover",
-                      borderRadius: "0.3rem",
-                    }}
-                  />
-                  <p style={{ fontSize: "0.8rem", marginTop: "0.3rem" }}>
-                    {myItem.name}
-                  </p>
-                </div>
-              ))}
+                />
+                <p style={{ fontSize: "0.8rem", marginTop: "0.3rem" }}>
+                  {myItem.name}
+                </p>
+              </div>
+            ))}
 
-              <button onClick={handleTradeRequest} style={sendButtonStyle}>
-                إرسال الطلب
-              </button>
-            </div>
-          )}
+            <button onClick={handleTradeRequest} style={sendButtonStyle}>
+              إرسال الطلب
+            </button>
+          </div>
         </>
       )}
     </div>

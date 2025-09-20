@@ -160,7 +160,7 @@ export default function Navbar() {
           <button
             onClick={() => navigate("/chatslist")}
             style={{
-              padding: "0.3rem 0.6rem",
+              padding: "0.1rem 0.5rem",
               background: "#3b82f6",
               color: "#fff",
               fontWeight: "bold",
@@ -209,6 +209,7 @@ export default function Navbar() {
 const linkStyle = {
   color: "#f9fafb",
   textDecoration: "none",
+  margin: "10px 0rem",
   padding: "0.3rem 0.6rem",
   borderRadius: "0.4rem",
   transition: "0.2s",

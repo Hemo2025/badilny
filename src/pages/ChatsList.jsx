@@ -17,18 +17,18 @@ import useSound from "use-sound";
 
 export default function ChatsList() {
   const [chats, setChats] = useState([]);
+  const [previewItem, setPreviewItem] = useState(null); // لمعاينة الصور
+  const [imageIndex, setImageIndex] = useState(0);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [notification, setNotification] = useState("");
   const openChatIdRef = useRef(null);
-
-  // صوت الإشعار من مجلد public
+  const seenMessagesRef = useRef(new Set());
   const [playNotification] = useSound(
     `${process.env.PUBLIC_URL}/sounds/notification.mp3`,
     { volume: 0.5 }
   );
 
-  // تعيين المستخدم الحالي
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((currentUser) =>
       setUser(currentUser)
@@ -36,7 +36,6 @@ export default function ChatsList() {
     return () => unsubscribeAuth();
   }, []);
 
-  // تنسيق الوقت
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "";
     const date = new Date(timestamp);
@@ -62,7 +61,6 @@ export default function ChatsList() {
     }
   };
 
-  // جلب المحادثات ومتابعة التحديثات
   useEffect(() => {
     if (!user) return;
 
@@ -104,38 +102,44 @@ export default function ChatsList() {
 
         chatMap[chatId].messages.push({ ...data, id: docSnap.id });
 
-        // حساب الرسائل الغير مقروءة وتشغيل الإشعار
-        if (!data.readBy?.includes(user.uid) && data.senderId !== user.uid) {
+        if (
+          !data.readBy?.includes(user.uid) &&
+          data.senderId !== user.uid &&
+          !seenMessagesRef.current.has(docSnap.id)
+        ) {
+          seenMessagesRef.current.add(docSnap.id);
+          showNotification(`رسالة جديدة من ${chatMap[chatId].otherName}`);
+          playNotification();
+        }
+
+        if (!data.readBy?.includes(user.uid)) {
           chatMap[chatId].unreadCount++;
-          if (openChatIdRef.current !== chatId) {
-            showNotification(`رسالة جديدة من ${chatMap[chatId].otherName}`);
-            playNotification();
-          }
         }
       }
 
-      // ترتيب الرسائل حسب الوقت وتحديث lastMessage وlastTimestamp
       Object.values(chatMap).forEach((chat) => {
         chat.messages.sort((a, b) => a.timestamp - b.timestamp);
         if (chat.messages.length > 0) {
           const lastMsg = chat.messages[chat.messages.length - 1];
           chat.lastMessage = lastMsg.text;
           chat.lastTimestamp = formatTimestamp(lastMsg.timestamp);
-        } else {
-          chat.lastMessage = "";
-          chat.lastTimestamp = "";
         }
       });
 
       const chatList = Object.values(chatMap);
-      chatList.sort((a, b) => b.unreadCount - a.unreadCount);
+      // ترتيب المحادثات حسب آخر رسالة (الأحدث أولاً)
+      chatList.sort(
+        (a, b) =>
+          (b.messages[b.messages.length - 1]?.timestamp || 0) -
+          (a.messages[a.messages.length - 1]?.timestamp || 0)
+      );
+
       setChats(chatList);
     });
 
     return () => unsubscribe();
   }, [user, playNotification]);
 
-  // فتح المحادثة
   const handleOpenChat = async (chat) => {
     openChatIdRef.current = chat.chatId;
 
@@ -149,10 +153,14 @@ export default function ChatsList() {
     navigate(`/chat/${chat.chatId}`, { state: { chat } });
   };
 
-  // عرض الإشعار
   const showNotification = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(""), 2000);
+  };
+
+  const openPreview = (item) => {
+    setPreviewItem(item);
+    setImageIndex(0);
   };
 
   return (
@@ -220,7 +228,19 @@ export default function ChatsList() {
                     height: "50px",
                     borderRadius: "0.5rem",
                     objectFit: "cover",
+                    cursor: "pointer",
+                    transition: "transform 0.3s",
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPreview(chat.requestedItem);
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.1)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
                 />
               )}
               {chat.offeredItem?.image && (
@@ -232,7 +252,19 @@ export default function ChatsList() {
                     height: "50px",
                     borderRadius: "0.5rem",
                     objectFit: "cover",
+                    cursor: "pointer",
+                    transition: "transform 0.3s",
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPreview(chat.offeredItem);
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.1)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
                 />
               )}
               <div
@@ -274,6 +306,79 @@ export default function ChatsList() {
           ))}
         </ul>
       </div>
+
+      {/* Modal معاينة الصور */}
+      {previewItem && (
+        <div
+          onClick={() => setPreviewItem(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10000,
+            cursor: "pointer",
+            padding: "1rem",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#1f2937",
+              borderRadius: "0.75rem",
+              padding: "1rem",
+              maxWidth: "500px",
+              width: "100%",
+              textAlign: "center",
+              color: "#f9fafb",
+              animation: "fadeInScale 0.3s ease",
+            }}
+          >
+            <img
+              src={previewItem.image}
+              alt={previewItem.name}
+              style={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "300px",
+                objectFit: "cover",
+                borderRadius: "0.5rem",
+                marginBottom: "1rem",
+                transition: "transform 0.3s",
+              }}
+            />
+            <h3 style={{ color: "#facc15", marginBottom: "0.5rem" }}>
+              {previewItem.name}
+            </h3>
+            <p style={{ fontSize: "0.9rem" }}>{previewItem.desc}</p>
+            <button
+              onClick={() => setPreviewItem(null)}
+              style={{
+                marginTop: "1rem",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.4rem",
+                background: "#facc15",
+                color: "#111827",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              إغلاق
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>
+        {`
+          @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        `}
+      </style>
     </PageWrapper>
   );
 }

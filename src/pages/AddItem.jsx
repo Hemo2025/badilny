@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 export default function AddItem() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+  const [category, setCategory] = useState(""); // ✅ التصنيف
   const [imageBase64, setImageBase64] = useState("");
   const [featured, setFeatured] = useState(false);
   const [user, setUser] = useState(null);
@@ -49,12 +50,17 @@ export default function AddItem() {
       alert("يرجى اختيار صورة للغرض!");
       return;
     }
+    if (!category) {
+      alert("يرجى اختيار تصنيف!");
+      return;
+    }
 
     setLoading(true);
     try {
       await addDoc(collection(db, "items"), {
         name,
         desc,
+        category, // ✅ إضافة التصنيف
         image: imageBase64,
         featured,
         userId: user.uid,
@@ -64,6 +70,7 @@ export default function AddItem() {
 
       setName("");
       setDesc("");
+      setCategory(""); // ✅ إفراغ التصنيف بعد الإرسال
       setImageBase64("");
       setFeatured(false);
 
@@ -103,6 +110,22 @@ export default function AddItem() {
             style={inputStyle}
           />
 
+          {/* ✅ حقل اختيار التصنيف */}
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+            style={inputStyle}
+          >
+            <option value="">-- اختر التصنيف --</option>
+            <option value="electronics">📱 إلكترونيات</option>
+            <option value="clothes">👕 ملابس</option>
+            <option value="furniture">🏠 أثاث</option>
+            <option value="games">🎮 ألعاب</option>
+            <option value="books">📚 كتب</option>
+            <option value="other">📦 أخرى</option>
+          </select>
+
           <div className="image-uploader">
             <input
               type="file"
@@ -123,7 +146,7 @@ export default function AddItem() {
             </label>
           </div>
 
-          {/* زر التميز الجديد - responsive */}
+          {/* زر التميز */}
           <label style={featuredLabelResponsiveLabelStyle}>
             <input
               type="checkbox"

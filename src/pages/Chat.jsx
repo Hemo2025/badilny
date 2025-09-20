@@ -193,7 +193,7 @@ export default function Chat() {
       </div>
       <div
         style={{
-          height: "100vh",
+          height: "70vh",
           display: "flex",
           flexDirection: "column",
           background: "#111827",
@@ -249,7 +249,7 @@ export default function Chat() {
         <div
           style={{
             position: "sticky",
-            top: 0,
+            top: "100px",
             textAlign: "center",
             background: "#111827",
             color: "#9ca3af",
