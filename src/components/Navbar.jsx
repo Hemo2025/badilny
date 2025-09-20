@@ -99,10 +99,10 @@ export default function Navbar() {
         }}
       >
         <Link to="/Market" style={linkStyle}>
-          الماركت
+          السوق
         </Link>
         <Link to="/Profile" style={linkStyle}>
-          ملفي
+          الملف الشخصي
         </Link>
 
         {user && (
@@ -117,7 +117,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            إضافة غرض
+          أضف غرض
           </Link>
         )}
 
@@ -129,12 +129,13 @@ export default function Navbar() {
               background: "#f59e0b",
               color: "#fff",
               fontWeight: "bold",
+              fontSize:" 0.9rem",
               borderRadius: "0.4rem",
               cursor: "pointer",
               position: "relative",
             }}
           >
-            المقايضات
+          المقايضات
             {pendingTrades > 0 && (
               <span
                 style={{
@@ -163,12 +164,13 @@ export default function Navbar() {
               background: "#3b82f6",
               color: "#fff",
               fontWeight: "bold",
+              fontSize: "1.4rem",
               borderRadius: "0.4rem",
               cursor: "pointer",
               position: "relative",
             }}
           >
-            الدردشات
+            💬
             {unreadChats > 0 && (
               <span
                 style={{
@@ -191,7 +193,7 @@ export default function Navbar() {
 
         {user && (
           <button onClick={handleLogout} style={buttonStyle}>
-            تسجيل الخروج
+            الخروج 🚪
           </button>
         )}
         {!user && (

@@ -264,7 +264,7 @@ export default function Chat() {
         {/* المحادثة */}
         <div
           ref={containerRef}
-          style={{ flex: .8, overflowY: "auto", padding: "1rem" }}
+          style={{ flex: 0.8, overflowY: "auto", padding: "1rem" }}
         >
           {groupedMessages.map((msg, idx) =>
             msg.type === "date" ? (
