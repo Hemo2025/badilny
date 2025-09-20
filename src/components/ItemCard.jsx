@@ -16,6 +16,8 @@ export default function ItemCard({ item }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   const tradeFormRef = useRef(null);
   const tradeButtonRef = useRef(null);
 
@@ -40,7 +42,6 @@ export default function ItemCard({ item }) {
       }
     });
 
-    // إغلاق Trade Form عند الضغط خارجها أو خارج الزر
     const handleClickOutside = (e) => {
       if (
         tradeFormRef.current &&
@@ -88,6 +89,36 @@ export default function ItemCard({ item }) {
     }
   };
 
+  // صياغة التاريخ والوقت
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+
+    const isToday =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday =
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate();
+
+    const timeStr = date.toLocaleTimeString("ar-SA", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (isToday) return `اليوم ${timeStr}`;
+    if (isYesterday) return `أمس ${timeStr}`;
+
+    const options = { day: "2-digit", month: "short", year: "numeric" };
+    return `${date.toLocaleDateString("en-US", options)} ${timeStr}`;
+  };
+
   return (
     <div
       style={{
@@ -102,21 +133,53 @@ export default function ItemCard({ item }) {
     >
       {showToast && <div style={toastStyle}>{toastMessage}</div>}
 
-      <img
-        src={item.image}
-        alt={item.name}
-        style={{
-          width: "100%",
-          height: "200px",
-          objectFit: "cover",
-          borderRadius: "0.5rem",
-        }}
-      />
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div style={lightboxStyle} onClick={() => setLightboxOpen(false)}>
+          <img
+            src={item.image}
+            alt={item.name}
+            style={{
+              maxHeight: "90%",
+              maxWidth: "90%",
+              borderRadius: "0.5rem",
+            }}
+          />
+        </div>
+      )}
+
+      <div style={{ position: "relative" }}>
+        <img
+          src={item.image}
+          alt={item.name}
+          style={{
+            width: "100%",
+            height: "200px",
+            objectFit: "cover",
+            borderRadius: "0.5rem",
+            cursor: "pointer",
+          }}
+          onClick={() => setLightboxOpen(true)}
+        />
+        {item.featured && <div style={featuredBadgeStyle}>⭐ مميز</div>}
+      </div>
+
       <h3 style={{ marginTop: "0.5rem", color: "#facc15" }}>{item.name}</h3>
       <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>{item.desc}</p>
       {item.userName && (
         <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
           بواسطة: {item.userName}
+        </p>
+      )}
+      {item.createdAt && (
+        <p
+          style={{
+            fontSize: "0.7rem",
+            color: "#9ca3af",
+            marginBottom: "0.2rem",
+          }}
+        >
+          أضيف بتاريخ: {formatDate(item.createdAt)}
         </p>
       )}
 
@@ -194,6 +257,33 @@ const toastStyle = {
   boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
   animation: "slideDown 0.3s ease-out",
   zIndex: 100,
+};
+
+const featuredBadgeStyle = {
+  position: "absolute",
+  top: "10px",
+  right: "10px",
+  background: "#03a9f4",
+  color: "white",
+  padding: "0.2rem 0.5rem",
+  borderRadius: "0.5rem",
+  fontWeight: "bold",
+  fontSize: "0.8rem",
+  boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+};
+
+const lightboxStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  background: "rgba(0,0,0,0.8)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+  cursor: "pointer",
 };
 
 const tradeButtonStyle = {

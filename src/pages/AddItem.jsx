@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
 import PageWrapper from "../components/PageWrapper";
 import { auth, db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import imageCompression from "browser-image-compression";
 import { useNavigate } from "react-router-dom";
+import { MdMargin } from "react-icons/md";
 
 export default function AddItem() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [category, setCategory] = useState(""); // ✅ التصنيف
+  const [category, setCategory] = useState("");
   const [imageBase64, setImageBase64] = useState("");
   const [featured, setFeatured] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastType, setToastType] = useState("success");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +27,15 @@ export default function AddItem() {
     );
     return () => unsubscribe();
   }, []);
+
+  const goBack = () => navigate(-1); // زر العودة للخلف
+
+  const showToastMsg = (msg, type = "success") => {
+    setToastMessage(msg);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -33,8 +47,7 @@ export default function AddItem() {
         reader.onloadend = () => setImageBase64(reader.result);
         reader.readAsDataURL(compressedFile);
       } catch (error) {
-        console.error("حدث خطأ أثناء ضغط الصورة:", error);
-        alert("حدث خطأ أثناء معالجة الصورة!");
+        showToastMsg("حدث خطأ أثناء معالجة الصورة!", "error");
       }
     }
   };
@@ -42,16 +55,16 @@ export default function AddItem() {
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!user) {
-      alert("يجب تسجيل الدخول أولاً!");
+      showToastMsg("يجب تسجيل الدخول أولاً!", "error");
       navigate("/Auth");
       return;
     }
     if (!imageBase64) {
-      alert("يرجى اختيار صورة للغرض!");
+      showToastMsg("يرجى اختيار صورة للغرض!", "error");
       return;
     }
     if (!category) {
-      alert("يرجى اختيار تصنيف!");
+      showToastMsg("يرجى اختيار تصنيف!", "error");
       return;
     }
 
@@ -60,7 +73,7 @@ export default function AddItem() {
       await addDoc(collection(db, "items"), {
         name,
         desc,
-        category, // ✅ إضافة التصنيف
+        category,
         image: imageBase64,
         featured,
         userId: user.uid,
@@ -70,27 +83,53 @@ export default function AddItem() {
 
       setName("");
       setDesc("");
-      setCategory(""); // ✅ إفراغ التصنيف بعد الإرسال
+      setCategory("");
       setImageBase64("");
       setFeatured(false);
 
-      alert("تم إرسال الطلب ✅");
+      showToastMsg("تم إرسال الغرض بنجاح", "success");
       navigate("/Market");
     } catch (error) {
-      console.error("خطأ أثناء إرسال الطلب:", error);
-      alert("حدث خطأ أثناء إرسال الطلب!");
+      showToastMsg("حدث خطأ أثناء إرسال الطلب!", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const categoriesList = [
+    { value: "electronics", label: "📱 إلكترونيات" },
+    { value: "clothes", label: "👕 ملابس" },
+    { value: "furniture", label: "🏠 أثاث" },
+    { value: "games", label: "🎮 ألعاب" },
+    { value: "books", label: "📚 كتب" },
+    { value: "other", label: "📦 أخرى" },
+  ];
+
   return (
     <PageWrapper>
-      <Navbar />
+      {/* زر الرجوع */}
+      <button onClick={goBack} style={backButtonStyle}>
+        &lt; الخلف
+      </button>
       <div className="container">
+        {showToast && (
+          <div
+            style={{
+              ...toastStyle,
+              background: toastType === "success" ? "#10b981" : "#ef4444",
+            }}
+          >
+            <span style={{ marginRight: "0.5rem" }}>
+              {toastType === "success" ? "✅" : "❌"}
+            </span>
+            {toastMessage}
+          </div>
+        )}
+
         <h1 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
           أضف غرض جديد
         </h1>
+
         <form
           onSubmit={handleAdd}
           style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
@@ -110,21 +149,46 @@ export default function AddItem() {
             style={inputStyle}
           />
 
-          {/* ✅ حقل اختيار التصنيف */}
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            style={inputStyle}
-          >
-            <option value="">-- اختر التصنيف --</option>
-            <option value="electronics">📱 إلكترونيات</option>
-            <option value="clothes">👕 ملابس</option>
-            <option value="furniture">🏠 أثاث</option>
-            <option value="games">🎮 ألعاب</option>
-            <option value="books">📚 كتب</option>
-            <option value="other">📦 أخرى</option>
-          </select>
+          <div>
+            <p
+              style={{
+                marginBottom: "0.5rem",
+                fontWeight: "bold",
+                color: "#facc15",
+              }}
+            >
+              التصنيف
+            </p>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+                marginBottom: "1rem",
+              }}
+            >
+              {categoriesList.map((cat) => (
+                <div
+                  key={cat.value}
+                  onClick={() => setCategory(cat.value)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "999px",
+                    background: category === cat.value ? "#facc15" : "#1f2937",
+                    color: category === cat.value ? "#1f2937" : "#f9fafb",
+                    cursor: "pointer",
+                    border:
+                      category === cat.value
+                        ? "2px solid #fbbf24"
+                        : "2px solid #374151",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {cat.label}
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="image-uploader">
             <input
@@ -146,7 +210,6 @@ export default function AddItem() {
             </label>
           </div>
 
-          {/* زر التميز */}
           <label style={featuredLabelResponsiveLabelStyle}>
             <input
               type="checkbox"
@@ -192,6 +255,18 @@ export default function AddItem() {
   );
 }
 
+const backButtonStyle = {
+  display: "inline-block",
+  width: "fit-content",
+  padding: "0.4rem .5rem",
+  borderRadius: "0.5rem",
+  border: "none",
+  background: "#facc15",
+  color: "#000",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
 const inputStyle = {
   width: "100%",
   padding: "0.5rem",
@@ -228,4 +303,19 @@ const featuredLabelResponsiveLabelStyle = {
   gap: "0.5rem",
   cursor: "pointer",
   flexWrap: "wrap",
+};
+
+const toastStyle = {
+  position: "fixed",
+  top: "20px",
+  left: "50%",
+  transform: "translateX(-50%)",
+  color: "#fff",
+  padding: "0.6rem 1.2rem",
+  borderRadius: "0.5rem",
+  fontWeight: "bold",
+  boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+  zIndex: 9999,
+  display: "flex",
+  alignItems: "center",
 };

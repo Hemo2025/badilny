@@ -163,7 +163,9 @@ export default function TradeRequests() {
 
   return (
     <PageWrapper>
-      <Navbar />
+      <div>
+        <Navbar />
+      </div>
       <div
         style={{
           padding: "1rem",

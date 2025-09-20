@@ -126,7 +126,7 @@ export default function Navbar() {
             onClick={() => navigate("/traderequests")}
             style={{
               padding: "0.3rem 0.6rem",
-              background: "#f59e0b",
+              background: "green",
               color: "#fff",
               fontWeight: "bold",
               fontSize:" 0.9rem",
@@ -218,8 +218,8 @@ const linkStyle = {
 
 const buttonStyle = {
   padding: "0.3rem 0.6rem",
-  background: "#facc15",
-  color: "#111827",
+  background: "tomato",
+  color: "#fff",
   fontWeight: "bold",
   border: "none",
   borderRadius: "0.4rem",

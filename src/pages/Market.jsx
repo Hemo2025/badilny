@@ -12,6 +12,7 @@ export default function Market() {
   const [categories, setCategories] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const allCategories = [
     { value: "clothes", label: "ملابس" },
@@ -35,10 +36,11 @@ export default function Market() {
           ...doc.data(),
         }));
 
-        // ترتيب featured أولًا
+        // ترتيب العناصر المميزة أولًا
         list.sort((a, b) =>
           a.featured === b.featured ? 0 : a.featured ? -1 : 1
         );
+
         setItems(list);
         setLoading(false);
       } catch (error) {
@@ -167,21 +169,47 @@ export default function Market() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
-              gap: "1.8rem",
+              gap: "1rem",
             }}
           >
             {filteredItems.map((item, idx) => (
               <ItemCard
                 key={idx}
                 item={item}
-                style={{
-                  borderRadius: "1rem",
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-                  transition: "transform 0.2s",
-                }}
-                imgProps={{ loading: "lazy" }}
+                showFeatured={true} // إظهار علامة المميز
+                onImageClick={() => setPreviewImage(item.image)}
               />
             ))}
+          </div>
+        )}
+
+        {/* Lightbox للمعاينة */}
+        {previewImage && (
+          <div
+            onClick={() => setPreviewImage(null)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.8)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{
+                maxWidth: "90%",
+                maxHeight: "90%",
+                borderRadius: "0.5rem",
+              }}
+            />
           </div>
         )}
       </div>
