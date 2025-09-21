@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { FiUser } from "react-icons/fi";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -102,22 +103,19 @@ export default function Navbar() {
           السوق
         </Link>
         <Link to="/Profile" style={linkStyle}>
-          الملف الشخصي
+          <FiUser
+            style={{
+              display: "inline",
+              verticalAlign: "middle",
+              fontSize: "1.6rem",
+              padding: "0.2rem",
+            }}
+          />
         </Link>
 
         {user && (
-          <Link
-            to="/Add"
-            style={{
-              padding: "0.3rem 0.6rem",
-              background: "#34d399",
-              color: "#111827",
-              fontWeight: "bold",
-              borderRadius: "0.4rem",
-              textDecoration: "none",
-            }}
-          >
-          أضف غرض
+          <Link to="/Add" className="add-btn floating-btn">
+            أضف غرض
           </Link>
         )}
 
@@ -126,16 +124,16 @@ export default function Navbar() {
             onClick={() => navigate("/traderequests")}
             style={{
               padding: "0.3rem 0.6rem",
-              background: "green",
-              color: "#fff",
+              background: "#f59e0b",
+              color: "#f6f6f6",
               fontWeight: "bold",
-              fontSize:" 0.9rem",
+              fontSize: "0.9rem",
               borderRadius: "0.4rem",
               cursor: "pointer",
               position: "relative",
             }}
           >
-          المقايضات
+            المقايضات
             {pendingTrades > 0 && (
               <span
                 style={{
@@ -202,6 +200,30 @@ export default function Navbar() {
           </button>
         )}
       </div>
+
+      {/* Floating button animation */}
+      <style>{`
+        .add-btn {
+          padding: 0.3rem 0.6rem;
+          background: #32e033;
+          color: #fff;
+          font-weight: bold;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          display: inline-block;
+          transition: transform 0.3s ease;
+        }
+
+        .floating-btn {
+          animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+          100% { transform: translateY(0px); }
+        }
+      `}</style>
     </nav>
   );
 }
@@ -210,7 +232,7 @@ const linkStyle = {
   color: "#f9fafb",
   textDecoration: "none",
   margin: "10px 0rem",
-  padding: "0.3rem 0.6rem",
+  padding: "0.3rem 4rem",
   borderRadius: "0.4rem",
   transition: "0.2s",
   background: "#374151",
@@ -219,6 +241,9 @@ const linkStyle = {
 const buttonStyle = {
   padding: "0.3rem 0.6rem",
   background: "tomato",
+  position: "relative",
+  top: "0",
+  left: "0",
   color: "#fff",
   fontWeight: "bold",
   border: "none",

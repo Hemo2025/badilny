@@ -67,8 +67,8 @@ nav a:hover::after {
 }
 
 nav a:hover {
-    color: #facc15;
-    transform: scale(1.1);
+    color: #facc15 !important;
+    transform: scale(1.01);
 }
 
 /* Container */
@@ -139,9 +139,8 @@ button {
     border-radius: 1rem;
     cursor: pointer;
     font-weight: 700;
-    box-shadow: 0 5px 15px rgba(250, 204, 21, 0.6);
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(250, 204, 21, 0.6);
+
 }
 
 button:hover {
