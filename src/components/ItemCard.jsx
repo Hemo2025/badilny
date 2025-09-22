@@ -4,9 +4,9 @@ import {
   collection,
   addDoc,
   serverTimestamp,
-  getDocs,
   query,
   where,
+  getDocs,
 } from "firebase/firestore";
 
 export default function ItemCard({ item }) {
@@ -17,6 +17,7 @@ export default function ItemCard({ item }) {
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [distanceKm, setDistanceKm] = useState(null);
 
   const tradeFormRef = useRef(null);
   const tradeButtonRef = useRef(null);
@@ -40,6 +41,23 @@ export default function ItemCard({ item }) {
         };
         fetchMyItems();
       }
+
+      // جلب موقع المستخدم الحالي
+      if (navigator.geolocation && item.location) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const userLat = pos.coords.latitude;
+          const userLng = pos.coords.longitude;
+          const { lat, lng } = item.location;
+
+          const distance = getDistanceFromLatLonInKm(
+            userLat,
+            userLng,
+            lat,
+            lng
+          );
+          setDistanceKm(distance.toFixed(1)); // تقريب رقم عشري
+        });
+      }
     });
 
     const handleClickOutside = (e) => {
@@ -57,7 +75,7 @@ export default function ItemCard({ item }) {
       unsubscribe();
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [item.location]);
 
   const showToastMsg = (msg) => {
     setToastMessage(msg);
@@ -89,17 +107,14 @@ export default function ItemCard({ item }) {
     }
   };
 
-  // صياغة التاريخ والوقت
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
-
     const isToday =
       date.getFullYear() === now.getFullYear() &&
       date.getMonth() === now.getMonth() &&
       date.getDate() === now.getDate();
-
     const yesterday = new Date();
     yesterday.setDate(now.getDate() - 1);
     const isYesterday =
@@ -111,42 +126,33 @@ export default function ItemCard({ item }) {
       hour: "2-digit",
       minute: "2-digit",
     });
-
     if (isToday) return `اليوم ${timeStr}`;
     if (isYesterday) return `أمس ${timeStr}`;
-
     const options = { day: "2-digit", month: "short", year: "numeric" };
     return `${date.toLocaleDateString("en-US", options)} ${timeStr}`;
   };
 
-  return (
-    <div
-      style={{
-        background: "#1f2937",
-        padding: "1rem",
-        borderRadius: "0.75rem",
-        color: "#f9fafb",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-        transition: "0.2s",
-        position: "relative",
-      }}
-    >
-      {showToast && <div style={toastStyle}>{toastMessage}</div>}
+  // ===== Haversine formula =====
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // نصف قطر الأرض بالكيلومتر
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
 
-      {/* Lightbox */}
-      {lightboxOpen && (
-        <div style={lightboxStyle} onClick={() => setLightboxOpen(false)}>
-          <img
-            src={item.image}
-            alt={item.name}
-            style={{
-              maxHeight: "90%",
-              maxWidth: "90%",
-              borderRadius: "0.5rem",
-            }}
-          />
-        </div>
-      )}
+  return (
+    <div style={cardStyle}>
+      {showToast && <div style={toastStyle}>{toastMessage}</div>}
 
       <div style={{ position: "relative" }}>
         <img
@@ -165,7 +171,44 @@ export default function ItemCard({ item }) {
       </div>
 
       <h3 style={{ marginTop: "0.5rem", color: "#facc15" }}>{item.name}</h3>
-      <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>{item.desc}</p>
+      <p style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>{item.desc}</p>
+
+      {item.category && (
+        <p
+          style={{
+            fontSize: "0.8rem",
+            color: "#34d399",
+            marginBottom: "0.3rem",
+          }}
+        >
+          📂 {item.category}
+        </p>
+      )}
+      {item.region && (
+        <p
+          style={{
+            fontSize: "0.8rem",
+            color: "#60a5fa",
+            marginBottom: "0.3rem",
+          }}
+        >
+          📍 {item.region}
+        </p>
+      )}
+
+      {/* عرض المسافة بالكيلومتر */}
+      {distanceKm && (
+        <p
+          style={{
+            fontSize: "0.8rem",
+            color: "#f9a825",
+            marginBottom: "0.3rem",
+          }}
+        >
+          🛣️ على بعد {distanceKm} كم
+        </p>
+      )}
+
       {item.userName && (
         <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
           بواسطة: {item.userName}
@@ -199,7 +242,6 @@ export default function ItemCard({ item }) {
               ...tradeFormStyle,
               maxHeight: showTradeForm ? "500px" : "0px",
               opacity: showTradeForm ? 1 : 0,
-              transition: "all 0.3s ease",
               overflow: "hidden",
             }}
           >
@@ -233,7 +275,6 @@ export default function ItemCard({ item }) {
                 </p>
               </div>
             ))}
-
             <button onClick={handleTradeRequest} style={sendButtonStyle}>
               إرسال الطلب
             </button>
@@ -243,6 +284,17 @@ export default function ItemCard({ item }) {
     </div>
   );
 }
+
+// ===== Styles =====
+const cardStyle = {
+  background: "#1f2937",
+  padding: "1rem",
+  borderRadius: "0.75rem",
+  color: "#f9fafb",
+  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+  transition: "0.2s",
+  position: "relative",
+};
 
 const toastStyle = {
   position: "absolute",
@@ -255,7 +307,6 @@ const toastStyle = {
   borderRadius: "0.5rem",
   fontWeight: "bold",
   boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-  animation: "slideDown 0.3s ease-out",
   zIndex: 100,
 };
 
@@ -270,20 +321,6 @@ const featuredBadgeStyle = {
   fontWeight: "bold",
   fontSize: "0.8rem",
   boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-};
-
-const lightboxStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100vw",
-  height: "100vh",
-  background: "rgba(0,0,0,0.8)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 9999,
-  cursor: "pointer",
 };
 
 const tradeButtonStyle = {
@@ -302,6 +339,7 @@ const tradeFormStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
   gap: "0.5rem",
+  transition: "all 0.3s ease",
 };
 
 const sendButtonStyle = {
@@ -311,5 +349,19 @@ const sendButtonStyle = {
   background: "#facc15",
   color: "#111827",
   fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const lightboxStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  background: "rgba(0,0,0,0.8)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
   cursor: "pointer",
 };
