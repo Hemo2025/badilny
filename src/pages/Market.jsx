@@ -14,15 +14,16 @@ export default function Market() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   const containerRef = useRef(null);
 
   const allCategories = [
-    { value: "clothes", label: "ملابس" },
-    { value: "electronics", label: "إلكترونيات" },
-    { value: "furniture", label: "أثاث" },
-    { value: "books", label: "كتب" },
-    { value: "other", label: "أخرى" },
+    { value: "👕 ملابس", label: "👕 ملابس" },
+    { value: "📱 إلكترونيات", label: "📱 إلكترونيات" },
+    { value: "🏠 أثاث", label: "🏠 أثاث" },
+    { value: "📚 كتب", label: "📚 كتب" },
+    { value: "📦 أخرى", label: "📦 أخرى" },
   ];
 
   const allRegions = [
@@ -38,20 +39,54 @@ export default function Market() {
     "جازان",
   ];
 
-  // Fetch items
+  // تحديد موقع المستخدم
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => console.error("خطأ في تحديد الموقع:", err),
+        { enableHighAccuracy: true }
+      );
+    }
+  }, []);
+
+  // جلب الأغراض
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const q = query(collection(db, "items"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          distanceKm: calculateDistance(
-            doc.data().latitude,
-            doc.data().longitude
-          ),
-        }));
+        const list = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          let distanceKm = null;
+
+          if (
+            userLocation &&
+            (data.latitude || data.location?.lat) &&
+            (data.longitude || data.location?.lng)
+          ) {
+            const lat = data.latitude || data.location.lat;
+            const lng = data.longitude || data.location.lng;
+            distanceKm = getDistanceFromLatLonInKm(
+              userLocation.lat,
+              userLocation.lng,
+              lat,
+              lng
+            ).toFixed(1);
+          }
+
+          return {
+            id: doc.id,
+            ...data,
+            distanceKm,
+          };
+        });
+
         list.sort((a, b) =>
           a.featured === b.featured ? 0 : a.featured ? -1 : 1
         );
@@ -63,9 +98,9 @@ export default function Market() {
       }
     };
     fetchItems();
-  }, []);
+  }, [userLocation]);
 
-  // Close filters when clicking outside
+  // غلق الفلاتر عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -248,14 +283,6 @@ export default function Market() {
 }
 
 // ===== Helpers =====
-function calculateDistance(lat, lon) {
-  if (!lat || !lon) return null;
-  // هنا يمكن إضافة إحداثيات المستخدم الحقيقي
-  const userLat = 24.7136; // مثال: الرياض
-  const userLon = 46.6753;
-  return getDistanceFromLatLonInKm(userLat, userLon, lat, lon).toFixed(1);
-}
-
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
@@ -269,7 +296,6 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }

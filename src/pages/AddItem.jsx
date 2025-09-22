@@ -50,11 +50,11 @@ export default function AddItem() {
   const navigate = useNavigate();
 
   const categoriesList = [
-    { value: "clothes", label: "👕 ملابس" },
-    { value: "electronics", label: "📱 إلكترونيات" },
-    { value: "furniture", label: "🏠 أثاث" },
-    { value: "books", label: "📚 كتب" },
-    { value: "other", label: "📦 أخرى" },
+    { value: "👕 ملابس", label: "👕 ملابس" },
+    { value: "📱 إلكترونيات", label: "📱 إلكترونيات" },
+    { value: "🏠 أثاث", label: "🏠 أثاث" },
+    { value: "📚 كتب", label: "📚 كتب" },
+    { value: "📦 أخرى", label: "📦 أخرى" },
   ];
 
   const regionsList = [

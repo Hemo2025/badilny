@@ -16,8 +16,8 @@ export default function ItemCard({ item }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [distanceKm, setDistanceKm] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const tradeFormRef = useRef(null);
   const tradeButtonRef = useRef(null);
@@ -42,7 +42,6 @@ export default function ItemCard({ item }) {
         fetchMyItems();
       }
 
-      // جلب موقع المستخدم الحالي
       if (navigator.geolocation && item.location) {
         navigator.geolocation.getCurrentPosition((pos) => {
           const userLat = pos.coords.latitude;
@@ -55,7 +54,7 @@ export default function ItemCard({ item }) {
             lat,
             lng
           );
-          setDistanceKm(distance.toFixed(1)); // تقريب رقم عشري
+          setDistanceKm(distance.toFixed(1));
         });
       }
     });
@@ -132,9 +131,8 @@ export default function ItemCard({ item }) {
     return `${date.toLocaleDateString("en-US", options)} ${timeStr}`;
   };
 
-  // ===== Haversine formula =====
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // نصف قطر الأرض بالكيلومتر
+    const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
@@ -170,62 +168,31 @@ export default function ItemCard({ item }) {
         {item.featured && <div style={featuredBadgeStyle}>⭐ مميز</div>}
       </div>
 
-      <h3 style={{ marginTop: "0.5rem", color: "#facc15" }}>{item.name}</h3>
-      <p style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>{item.desc}</p>
+      {/* تفاصيل الغرض */}
+      <div style={{ marginTop: "0.5rem" }}>
+        <h3 style={{ color: "#facc15" }}>{item.name}</h3>
+        <p style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+          {item.desc}
+        </p>
+        {item.category && <p style={infoStyle}>التصنيف : "{item.category}"</p>}
+        {item.region && <p style={infoStyle}>📍 {item.region}</p>}
+        {item.addressDesc && <p style={infoStyle}>الحي: {item.addressDesc}</p>}
+        {distanceKm && <p style={infoStyle}>🛣️ على بعد {distanceKm} كم</p>}
+        {item.userName && <p style={infoStyle}>بواسطة: {item.userName}</p>}
+        {item.createdAt && (
+          <p
+            style={{
+              fontSize: "0.7rem",
+              color: "#9ca3af",
+              marginBottom: "0.2rem",
+            }}
+          >
+            أضيف بتاريخ: {formatDate(item.createdAt)}
+          </p>
+        )}
+      </div>
 
-      {item.category && (
-        <p
-          style={{
-            fontSize: "0.8rem",
-            color: "#34d399",
-            marginBottom: "0.3rem",
-          }}
-        >
-          📂 {item.category}
-        </p>
-      )}
-      {item.region && (
-        <p
-          style={{
-            fontSize: "0.8rem",
-            color: "#60a5fa",
-            marginBottom: "0.3rem",
-          }}
-        >
-          📍 {item.region}
-        </p>
-      )}
-
-      {/* عرض المسافة بالكيلومتر */}
-      {distanceKm && (
-        <p
-          style={{
-            fontSize: "0.8rem",
-            color: "#f9a825",
-            marginBottom: "0.3rem",
-          }}
-        >
-          🛣️ على بعد {distanceKm} كم
-        </p>
-      )}
-
-      {item.userName && (
-        <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
-          بواسطة: {item.userName}
-        </p>
-      )}
-      {item.createdAt && (
-        <p
-          style={{
-            fontSize: "0.7rem",
-            color: "#9ca3af",
-            marginBottom: "0.2rem",
-          }}
-        >
-          أضيف بتاريخ: {formatDate(item.createdAt)}
-        </p>
-      )}
-
+      {/* زر المقايضة */}
       {user && item.userId !== user.uid && (
         <>
           <button
@@ -240,9 +207,9 @@ export default function ItemCard({ item }) {
             ref={tradeFormRef}
             style={{
               ...tradeFormStyle,
-              maxHeight: showTradeForm ? "500px" : "0px",
+              maxHeight: showTradeForm ? "300px" : "0px",
               opacity: showTradeForm ? 1 : 0,
-              overflow: "hidden",
+              overflowY: "auto",
             }}
           >
             {myItems.map((myItem) => (
@@ -281,6 +248,21 @@ export default function ItemCard({ item }) {
           </div>
         </>
       )}
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div style={lightboxStyle} onClick={() => setLightboxOpen(false)}>
+          <img
+            src={item.image}
+            alt={item.name}
+            style={{
+              maxWidth: "90%",
+              maxHeight: "90%",
+              borderRadius: "0.5rem",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -295,7 +277,6 @@ const cardStyle = {
   transition: "0.2s",
   position: "relative",
 };
-
 const toastStyle = {
   position: "absolute",
   top: "-40px",
@@ -309,7 +290,6 @@ const toastStyle = {
   boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
   zIndex: 100,
 };
-
 const featuredBadgeStyle = {
   position: "absolute",
   top: "10px",
@@ -322,7 +302,6 @@ const featuredBadgeStyle = {
   fontSize: "0.8rem",
   boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
 };
-
 const tradeButtonStyle = {
   marginTop: "0.5rem",
   width: "100%",
@@ -333,7 +312,6 @@ const tradeButtonStyle = {
   fontWeight: "bold",
   cursor: "pointer",
 };
-
 const tradeFormStyle = {
   marginTop: "0.5rem",
   display: "grid",
@@ -341,7 +319,6 @@ const tradeFormStyle = {
   gap: "0.5rem",
   transition: "all 0.3s ease",
 };
-
 const sendButtonStyle = {
   gridColumn: "1 / -1",
   padding: "0.5rem",
@@ -351,7 +328,11 @@ const sendButtonStyle = {
   fontWeight: "bold",
   cursor: "pointer",
 };
-
+const infoStyle = {
+  fontSize: "0.8rem",
+  color: "#9ca3af",
+  marginBottom: "0.3rem",
+};
 const lightboxStyle = {
   position: "fixed",
   top: 0,
