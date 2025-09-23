@@ -170,8 +170,17 @@ export default function ItemCard({ item }) {
 
       {/* تفاصيل الغرض */}
       <div style={{ marginTop: "0.5rem" }}>
-        <h3 style={{ color: "#facc15" }}>{item.name}</h3>
-        <p style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+        <h3 style={{ color: "#00ABE4" }}>{item.name}</h3>
+        <p
+          style={{
+            fontSize: "0.9rem",
+            background: "#1e293b",
+            padding: "3px 10px 3px 5px",
+            marginBottom: "0.3rem",
+            borderRadius: "0.5rem",
+            backgroundColor: "rgb(136 212 241)",
+          }}
+        >
           {item.desc}
         </p>
         {item.category && <p style={infoStyle}>التصنيف : "{item.category}"</p>}
@@ -183,7 +192,7 @@ export default function ItemCard({ item }) {
           <p
             style={{
               fontSize: "0.7rem",
-              color: "#9ca3af",
+              color: "#4B5563",
               marginBottom: "0.2rem",
             }}
           >
@@ -269,7 +278,7 @@ export default function ItemCard({ item }) {
 
 // ===== Styles =====
 const cardStyle = {
-  background: "#1f2937",
+  background: "#F9FAFB",
   padding: "1rem",
   borderRadius: "0.75rem",
   color: "#f9fafb",
@@ -330,7 +339,7 @@ const sendButtonStyle = {
 };
 const infoStyle = {
   fontSize: "0.8rem",
-  color: "#9ca3af",
+  color: "#4B5563",
   marginBottom: "0.3rem",
 };
 const lightboxStyle = {

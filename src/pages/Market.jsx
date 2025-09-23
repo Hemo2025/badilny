@@ -15,6 +15,7 @@ export default function Market() {
   const [loading, setLoading] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [sortByDistance, setSortByDistance] = useState(false);
 
   const containerRef = useRef(null);
 
@@ -39,7 +40,7 @@ export default function Market() {
     "جازان",
   ];
 
-  // تحديد موقع المستخدم
+  // ===== تحديد موقع المستخدم =====
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -55,7 +56,7 @@ export default function Market() {
     }
   }, []);
 
-  // جلب الأغراض
+  // ===== جلب العناصر =====
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -100,7 +101,7 @@ export default function Market() {
     fetchItems();
   }, [userLocation]);
 
-  // غلق الفلاتر عند الضغط خارجها
+  // ===== غلق الفلاتر عند الضغط خارجها =====
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -127,45 +128,83 @@ export default function Market() {
     );
   };
 
-  const filteredItems = items.filter((item) => {
+  // ===== Filtered Items =====
+  let filteredItems = items.filter((item) => {
     const matchesSearch = item.name
       ?.toLowerCase()
       .includes(search.toLowerCase());
+
     const matchesCategory =
-      categories.length === 0 || categories.includes(item.category);
-    const matchesRegion = regions.length === 0 || regions.includes(item.region);
-    if (tab === "featured") return matchesSearch && item.featured;
-    if (tab === "category")
-      return matchesSearch && matchesCategory && matchesRegion;
-    return matchesSearch;
+      categories.length === 0 || categories.includes(item.category || "");
+
+    const matchesRegion =
+      regions.length === 0 || regions.includes(item.region || "");
+
+    const matchesFeatured = tab === "featured" ? item.featured : true;
+
+    return matchesSearch && matchesCategory && matchesRegion && matchesFeatured;
   });
+
+  if (sortByDistance && userLocation) {
+    filteredItems = filteredItems.sort((a, b) => {
+      if (a.distanceKm === null) return 1;
+      if (b.distanceKm === null) return -1;
+      return a.distanceKm - b.distanceKm;
+    });
+  }
 
   return (
     <PageWrapper>
       <Navbar />
       <div ref={containerRef} style={styles.container}>
-        {/* Tabs */}
-        <div style={styles.tabsContainer}>
-          {[
-            { key: "all", label: "الكل" },
-            { key: "featured", label: "مميز" },
-            { key: "category", label: "فلتر" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() =>
-                setTab(t.key) ||
-                setFiltersOpen(t.key === "category" ? !filtersOpen : false)
-              }
-              style={{
-                ...styles.tabButton,
-                background: tab === t.key ? "#facc15" : "#f3f4f6",
-                color: tab === t.key ? "#1f2937" : "#6b7280",
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
+        {/* Tabs + زر الأقرب إلي */}
+        <div style={styles.tabsWrapper}>
+          <div style={styles.tabsContainer}>
+            {[
+              { key: "all", label: "الكل" },
+              { key: "featured", label: "مميز" },
+              { key: "category", label: "فلتر" },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() =>
+                  setTab(t.key) ||
+                  setFiltersOpen(t.key === "category" ? !filtersOpen : false)
+                }
+                style={{
+                  ...styles.tabButton,
+                  background: tab === t.key ? "#facc15" : "#f3f4f6",
+                  color: tab === t.key ? "#1f2937" : "#6b7280",
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {/* زر الأقرب إلي */}
+          <button
+            onClick={() => setSortByDistance(!sortByDistance)}
+            style={{
+              ...styles.distanceButton,
+              background: sortByDistance ? "#fbbf24" : "#1f2937", // أصفر عند التحديد، داكن عادي
+              color: sortByDistance ? "#1f2937" : "#f9fafb",
+              boxShadow: sortByDistance
+                ? "0 4px 12px rgba(251, 191, 36, 0.6)"
+                : "0 2px 6px rgba(0,0,0,0.3)",
+              transform: sortByDistance ? "scale(1.05)" : "scale(1)",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.boxShadow =
+                "0 6px 16px rgba(251,191,36,0.7)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.boxShadow = sortByDistance
+                ? "0 4px 12px rgba(251, 191, 36, 0.6)"
+                : "0 2px 6px rgba(0,0,0,0.3)")
+            }
+          >
+            الأقرب إلي
+          </button>
         </div>
 
         {/* Filters */}
@@ -178,6 +217,7 @@ export default function Market() {
             overflow: "hidden",
           }}
         >
+          {/* Search داخل الفلتر */}
           <div style={styles.filterSearch}>
             <input
               type="text"
@@ -192,6 +232,12 @@ export default function Market() {
                 }
               }}
             />
+            <button
+              onClick={() => setFiltersOpen(false)}
+              style={styles.searchButton}
+            >
+              بحث
+            </button>
           </div>
 
           {/* Categories */}
@@ -237,24 +283,13 @@ export default function Market() {
               ))}
             </div>
           </div>
-
-          <div
-            style={{ width: "100%", marginTop: "1rem", textAlign: "center" }}
-          >
-            <button
-              onClick={() => setFiltersOpen(false)}
-              style={styles.searchButton}
-            >
-              بحث
-            </button>
-          </div>
         </div>
 
         {/* Items Grid */}
         {loading ? (
           <p style={styles.loadingText}>جاري التحميل...</p>
         ) : filteredItems.length === 0 ? (
-          <p style={styles.loadingText}>لا توجد أغراض.</p>
+          <p style={styles.loadingText}>لا توجد أغراض مطابقة للفلاتر.</p>
         ) : (
           <div style={styles.gridContainer}>
             {filteredItems.map((item, idx) => (
@@ -303,12 +338,18 @@ function deg2rad(deg) {
 // ===== Styles =====
 const styles = {
   container: { maxWidth: "1200px", margin: "2rem auto", padding: "1rem" },
-  tabsContainer: {
+  tabsWrapper: {
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    alignItems: "center",
     flexWrap: "wrap",
     gap: "0.5rem",
     marginBottom: "1rem",
+  },
+  tabsContainer: {
+    display: "flex",
+    gap: "0.5rem",
+    flexWrap: "wrap",
   },
   tabButton: {
     padding: "0.6rem 1.2rem",
@@ -318,25 +359,33 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
+  distanceButton: {
+    padding: "0.5rem 1rem",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    fontSize: "0.95rem",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+  },
+
   filtersContainer: {
     display: "flex",
     gap: "1rem",
     flexWrap: "wrap",
     marginBottom: "1rem",
   },
-  filterColumn: { flex: "1 1 300px", minWidth: "150px" },
-  filterTitle: { fontWeight: "bold", marginBottom: "0.5rem", color: "#fbbf24" },
-  filterOptions: { display: "flex", flexWrap: "wrap", gap: "0.5rem" },
-  filterOption: {
-    padding: "0.5rem 1rem",
-    borderRadius: "999px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    fontSize: "0.9rem",
-  },
-  filterSearch: { width: "100%", marginBottom: "1rem" },
-  searchInput: {
+  filterSearch: {
     width: "100%",
+    display: "flex",
+    gap: "0.5rem",
+    marginBottom: "1rem",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
     padding: "0.7rem 1rem",
     borderRadius: "0.7rem",
     border: "1px solid #facc15",
@@ -354,6 +403,16 @@ const styles = {
     borderRadius: "0.7rem",
     cursor: "pointer",
     transition: "all 0.2s ease",
+  },
+  filterColumn: { flex: "1 1 300px", minWidth: "150px" },
+  filterTitle: { fontWeight: "bold", marginBottom: "0.5rem", color: "#fbbf24" },
+  filterOptions: { display: "flex", flexWrap: "wrap", gap: "0.5rem" },
+  filterOption: {
+    padding: "0.5rem 1rem",
+    borderRadius: "999px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    fontSize: "0.9rem",
   },
   gridContainer: {
     display: "grid",
@@ -387,6 +446,10 @@ const styles = {
     objectFit: "contain",
   },
   "@media (max-width: 768px)": {
+    tabsWrapper: { flexDirection: "column", alignItems: "flex-start" },
+    tabsContainer: { gap: "0.3rem" },
+    tabButton: { padding: "0.4rem 0.8rem", fontSize: "0.85rem" },
+    distanceButton: { padding: "0.3rem 0.7rem", fontSize: "0.85rem" },
     filtersContainer: { flexDirection: "column" },
     gridContainer: { gridTemplateColumns: "1fr" },
   },

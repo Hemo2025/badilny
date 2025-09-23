@@ -109,8 +109,8 @@ export default function Profile() {
             marginBottom: "1rem",
             padding: "0.5rem 1rem",
             borderRadius: "0.5rem",
-            background: "#facc15",
-            color: "#111827",
+            background: "#00ABE4",
+            color: "#fff",
             fontWeight: "bold",
             border: "none",
             cursor: "pointer",
@@ -154,7 +154,7 @@ export default function Profile() {
 
 const editButtonStyle = {
   padding: "0.3rem 0.6rem",
-  background: "#3b82f6",
+  background: "rgb(50 160 73)",
   color: "#fff",
   borderRadius: "0.4rem",
   border: "none",

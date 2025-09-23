@@ -171,12 +171,21 @@ export default function ChatsList() {
       <div
         style={{
           padding: "1rem",
-          background: "#111827",
-          minHeight: "100vh",
+          background:
+            "linear-gradient(135deg, #E9F1FA, #00ABE4) no-repeat fixed",
+          minHeight: "100svh",
+          height:"100dvh",
           color: "#f9fafb",
         }}
       >
-        <h2 style={{ color: "#facc15", marginBottom: "1rem" }}>
+        <h2
+          style={{
+            color: "snow",
+            marginBottom: "1rem",
+            background:
+              "linear-gradient(135deg, rgb(40, 57, 76), rgb(61, 54, 127))",
+          }}
+        >
           قائمة المحادثات
         </h2>
 

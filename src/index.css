@@ -14,7 +14,7 @@ body {
     margin: 0;
     font-family: 'cairo', sans-serif;
     font-weight: 600;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
+    background: linear-gradient(135deg, #E9F1FA, #00ABE4) no-repeat fixed;
     color: #f1f5f9;
     overflow-x: hidden;
 }
@@ -30,7 +30,7 @@ nav {
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 2px solid #facc15;
+    border-bottom: 2px solid snow;
     border-radius: 0 0 20px 20px;
 }
 
@@ -55,7 +55,7 @@ nav a::after {
     display: block;
     width: 0;
     height: 2px;
-    background: #facc15;
+    background: #ffffff;
     transition: width 0.3s;
     position: absolute;
     bottom: -5px;
@@ -67,8 +67,12 @@ nav a:hover::after {
 }
 
 nav a:hover {
-    color: #facc15 !important;
+    color: #00ABE4 !important;
     transform: scale(1.01);
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Container */
@@ -116,7 +120,7 @@ nav a:hover {
     font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #facc15;
+    color: #00ABE4 !important;
     text-shadow: 0 0 8px #facc15;
 }
 

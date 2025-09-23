@@ -4,6 +4,7 @@ import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { FiUser } from "react-icons/fi";
+import { NavLink } from "react-router-dom";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -76,7 +77,8 @@ export default function Navbar() {
         justifyContent: "space-between",
         alignItems: "center",
         padding: "0.8rem 1rem",
-        background: "#1f2937",
+        background: "rgb(136, 212, 241)",
+        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.4)",
         color: "#f9fafb",
         position: "sticky",
         top: 0,
@@ -84,12 +86,26 @@ export default function Navbar() {
         fontSize: "0.9rem",
       }}
     >
-      <Link
+      <NavLink
         to="/"
-        style={{ fontWeight: "bold", fontSize: "1.5rem", color: "#facc15" }}
+        style={({ isActive }) => ({
+          fontWeight: "bold",
+          fontSize: "1.5rem",
+          color: "snow",
+          textTransform: "uppercase",
+          padding: "0.3rem 0.5rem",
+          borderRadius: "0.4rem",
+          transition: "0.2s",
+          ...(isActive && {
+            color: "#00ABE4",
+            backgroundColor: "#ffffff",
+            transform: "scale(1.01)",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          }),
+        })}
       >
         Badilny
-      </Link>
+      </NavLink>
 
       <div
         style={{
@@ -99,10 +115,43 @@ export default function Navbar() {
           flexWrap: "wrap",
         }}
       >
-        <Link to="/Market" style={linkStyle}>
+        <NavLink
+          to="/Market"
+          style={({ isActive }) => ({
+            ...linkStyle,
+            // إذا كان الزر active (أي نحن في صفحة /Market)
+            ...(isActive && {
+              color: "#00ABE4",
+              transform: "scale(1.01)",
+              backgroundColor: "#ffffff",
+              padding: "0.3rem 4rem",
+              borderRadius: "0.4rem",
+              transition: "0.2s",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+            }),
+          })}
+        >
           السوق
-        </Link>
-        <Link to="/Profile" style={linkStyle}>
+        </NavLink>
+
+        <NavLink
+          to="/Profile"
+          style={({ isActive }) => ({
+            ...linkStyle,
+            padding: "0.3rem 4rem", // حجم أصغر للأيقونة
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            ...(isActive && {
+              color: "#00ABE4",
+              transform: "scale(1.01)",
+              backgroundColor: "#ffffff",
+              borderRadius: "0.4rem",
+              transition: "0.2s",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+            }),
+          })}
+        >
           <FiUser
             style={{
               display: "inline",
@@ -111,7 +160,7 @@ export default function Navbar() {
               padding: "0.2rem",
             }}
           />
-        </Link>
+        </NavLink>
 
         {user && (
           <Link to="/Add" className="add-btn floating-btn">
@@ -120,18 +169,26 @@ export default function Navbar() {
         )}
 
         {user && (
-          <button
-            onClick={() => navigate("/traderequests")}
-            style={{
-              padding: "0.3rem 0.6rem",
-              background: "#f59e0b",
+          <NavLink
+            to="/traderequests"
+            style={({ isActive }) => ({
+              padding: "0.25rem 0.5rem", // أصغر شوي
               color: "#f6f6f6",
+              background: "rgb(0, 171, 228) ",
               fontWeight: "bold",
-              fontSize: "0.9rem",
+              fontSize: "0.85rem",
               borderRadius: "0.4rem",
               cursor: "pointer",
               position: "relative",
-            }}
+              textAlign: "center",
+              transition: "all 0.2s ease",
+              ...(isActive && {
+                color: "#00ABE4",
+                backgroundColor: "#ffffff",
+                transform: "scale(1.01)",
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              }),
+            })}
           >
             المقايضات
             {pendingTrades > 0 && (
@@ -143,32 +200,32 @@ export default function Navbar() {
                   background: "red",
                   color: "#fff",
                   borderRadius: "50%",
-                  padding: "0.15rem 0.5rem",
-                  fontSize: "0.75rem",
+                  padding: "0.15rem 0.4rem",
+                  fontSize: "0.7rem",
                   fontWeight: "bold",
                 }}
               >
                 {pendingTrades}
               </span>
             )}
-          </button>
+          </NavLink>
         )}
 
         {user && (
           <button
             onClick={() => navigate("/chatslist")}
             style={{
-              padding: "0.1rem 0.5rem",
-              background: "#3b82f6",
-              color: "#fff",
+              background: "rgb(50 160 73)",
               fontWeight: "bold",
-              fontSize: "1.4rem",
+              fontSize: "1rem",
+              padding: "0.25rem 0.5rem",
+              color: "#fff",
               borderRadius: "0.4rem",
               cursor: "pointer",
               position: "relative",
             }}
           >
-            💬
+            المحادثات💬
             {unreadChats > 0 && (
               <span
                 style={{
@@ -235,7 +292,6 @@ const linkStyle = {
   padding: "0.3rem 4rem",
   borderRadius: "0.4rem",
   transition: "0.2s",
-  background: "#374151",
 };
 
 const buttonStyle = {
