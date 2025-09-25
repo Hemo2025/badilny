@@ -78,7 +78,7 @@ export default function Navbar() {
         alignItems: "center",
         padding: "0.8rem 1rem",
         background: "rgb(136, 212, 241)",
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.4)",
+        boxShadow: "0 2px 4px snow",
         color: "#f9fafb",
         position: "sticky",
         top: 0,

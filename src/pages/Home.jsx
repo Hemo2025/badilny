@@ -9,9 +9,15 @@ export default function Home() {
         <h1
           style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1rem" }}
         >
-          مرحباً بك في موقع بادلني 
+          مرحباً بك في موقع بــــــــدِّل
         </h1>
-        <p style={{ fontSize: "1rem", color: "#d1d5db" }}>
+        <p
+          style={{
+            fontSize: "1rem",
+            color: "rgb(0 83 209)",
+            transform: "skewX(157deg)",
+          }}
+        >
           ابدأ بتصفح الأغراض وبادلها بسهولة!
         </p>
       </div>

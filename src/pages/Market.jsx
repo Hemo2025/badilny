@@ -173,8 +173,8 @@ export default function Market() {
                 }
                 style={{
                   ...styles.tabButton,
-                  background: tab === t.key ? "#facc15" : "#f3f4f6",
-                  color: tab === t.key ? "#1f2937" : "#6b7280",
+                  background: tab === t.key ? "#00ABE4" : "#f3f4f6",
+                  color: tab === t.key ? "#f9fafb" : "#00ABE4",
                 }}
               >
                 {t.label}
@@ -186,8 +186,8 @@ export default function Market() {
             onClick={() => setSortByDistance(!sortByDistance)}
             style={{
               ...styles.distanceButton,
-              background: sortByDistance ? "#fbbf24" : "#1f2937", // أصفر عند التحديد، داكن عادي
-              color: sortByDistance ? "#1f2937" : "#f9fafb",
+              background: sortByDistance ? "#00ABE4" : "#1f2937", // أصفر عند التحديد، داكن عادي
+              color: sortByDistance ? "snow" : "#f9fafb",
               boxShadow: sortByDistance
                 ? "0 4px 12px rgba(251, 191, 36, 0.6)"
                 : "0 2px 6px rgba(0,0,0,0.3)",

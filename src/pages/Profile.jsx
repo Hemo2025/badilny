@@ -100,7 +100,7 @@ export default function Profile() {
     <PageWrapper>
       <Navbar />
       <div style={{ maxWidth: "1200px", margin: "2rem auto", padding: "1rem" }}>
-        <h2 style={{ color: "#facc15" }}>
+        <h2 style={{ color: "snow" }}>
           أهلاً، {user.displayName || user.email}
         </h2>
         <button

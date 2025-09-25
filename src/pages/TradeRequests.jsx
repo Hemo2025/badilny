@@ -170,11 +170,20 @@ export default function TradeRequests() {
         style={{
           padding: "1rem",
           minHeight: "100vh",
-          background: "#111827",
           color: "#f9fafb",
         }}
       >
-        <h2 style={{ color: "#facc15", marginBottom: "1rem" }}>
+        <h2
+          style={{
+            color: "#00ABE4",
+            boxShadow: "0 0 10px snow",
+            marginBottom: "1rem",
+            background: "snow",
+            textShadow: "0 0 5px #00ABE4",
+            padding: "0.5rem",
+            borderRadius: "0.5rem",
+          }}
+        >
           طلبات المقايضة
         </h2>
 
@@ -194,9 +203,9 @@ export default function TradeRequests() {
                   activeTab === tab
                     ? tab === "accepted"
                       ? "#16a34a"
-                      : "#facc15"
+                      : "#00abe4"
                     : "#1f2937",
-                color: activeTab === tab ? "#111827" : "#f9fafb",
+                color: activeTab === tab ? "snow" : "#f9fafb",
               }}
             >
               {tab === "pending"
@@ -215,7 +224,7 @@ export default function TradeRequests() {
               textAlign: "center",
               marginTop: "3rem",
               fontSize: "1.2rem",
-              color: "#fbbf24",
+              color: "snow",
               animation: "pulse 1.5s infinite",
             }}
           >
@@ -227,7 +236,7 @@ export default function TradeRequests() {
               textAlign: "center",
               marginTop: "3rem",
               fontSize: "1.1rem",
-              color: "#fbbf24",
+              color: "snow",
             }}
           >
             لا توجد طلبات في هذه الحالة

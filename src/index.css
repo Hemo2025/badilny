@@ -30,15 +30,15 @@ nav {
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 2px solid snow;
+    border-bottom: 1px solid snow;
     border-radius: 0 0 20px 20px;
 }
 
 nav h1 {
     font-size: 2rem;
     font-weight: 900;
-    color: #facc15;
-    text-shadow: 0 0 10px #facc15;
+    color: #00ABE4;
+    text-shadow: 0 0 10px #00ABE4;
 }
 
 nav a {
@@ -148,8 +148,8 @@ button {
 }
 
 button:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.8);
+    transform: skew(10deg) scale(1.05);
+    box-shadow: 0 0 2px 0px #00ABE4;
 }
 
 
@@ -164,23 +164,32 @@ input {
     font-weight: 500;
     transition: all 0.3s ease;
     box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4);
+    transition: .5s ease-in-out;
+    caret-color: snow;
 }
 
 input::placeholder {
-    color: #9ca3af;
+    color: #00ABE4;
+}
+
+input:focus::placeholder {
+    color: #ffffff;
+    transition: .5s ease-in-out;
+
 }
 
 input:focus {
     outline: none;
-    box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+    box-shadow: inset 0 0 10px 20px #00ABE4;
+    transition: .5s ease-in-out;
 }
 
 /* العناوين */
 h1,
 h2 {
     text-align: center;
-    color: #facc15;
-    text-shadow: 0 0 10px #facc15;
+    color: "snow";
+    text-shadow: 0 0 10px #00ABE4;
 }
 
 /* استجابة الهواتف */

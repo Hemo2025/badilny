@@ -490,10 +490,12 @@ export default function AddItem() {
 const backButtonStyle = {
   display: "inline-block",
   padding: "0.4rem .5rem",
+  marginTop: "1rem",
   borderRadius: "0.5rem",
   border: "none",
-  background: "#facc15",
-  color: "#000",
+  fontSize: "1rem",
+  background: "#00ABE4",
+  color: "snow",
   fontWeight: "bold",
   cursor: "pointer",
 };
@@ -501,9 +503,9 @@ const inputStyle = {
   width: "100%",
   padding: "0.5rem",
   borderRadius: "0.5rem",
-  border: "1px solid #facc15",
-  background: "#111827",
-  color: "#f9fafb",
+  border: "1px solid snow",
+  background: "white",
+  color: "black",
 };
 const toggleButtonStyle = {
   padding: "0.5rem 1rem",
@@ -536,10 +538,14 @@ const imageLabelStyle = {
   justifyContent: "center",
   alignItems: "center",
   height: "150px",
-  border: "2px dashed #facc15",
+  border: "2px dashed snow",
   borderRadius: "0.5rem",
   cursor: "pointer",
-  color: "#facc15",
+  color: "#f9fafb",
+  background: "#2c3e50",
+  textAlign: "center",
+  padding: "1rem",
+  fontSize: "1rem",
 };
 const submitButtonStyle = {
   padding: "0.6rem",
@@ -575,7 +581,7 @@ const iconButtonStyle = {
   padding: "0.5rem",
   borderRadius: "50%",
   border: "none",
-  background: "#facc15",
+  background: "#f3f4f6",
   color: "#111827",
   fontSize: "1.2rem",
   cursor: "pointer",

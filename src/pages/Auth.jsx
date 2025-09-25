@@ -178,14 +178,28 @@ export default function Auth() {
                 ? "إنشاء حساب"
                 : "تسجيل الدخول"}
             </button>
-            <p style={{ textAlign: "center", marginTop: "1rem" }}>
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: "5rem",
+                fontSize: "0.9rem",
+                color: "#f1f5f9",
+                fontWeight: "900",
+                backdropFilter: "blur(5px)",}}
+            >
               {isSignup ? "لديك حساب؟" : "لا تملك حساب؟"}{" "}
               <span
                 onClick={() => {
                   setIsSignup(!isSignup);
                   setShowNameInput(false);
                 }}
-                style={{ color: "#facc15", cursor: "pointer" }}
+                style={{
+                  color: "#00ABE4",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  backdropFilter: "blur(5px)",
+                  fontWeight: "bold",
+                }}
               >
                 {isSignup ? "تسجيل الدخول" : "إنشاء حساب"}
               </span>
@@ -206,7 +220,7 @@ const MessageBox = ({ message }) => (
       borderRadius: "0.5rem",
       textAlign: "center",
       backgroundColor: message.type === "success" ? "#34d399" : "#f87171",
-      color: "#111827",
+
       fontWeight: "bold",
     }}
   >
@@ -216,25 +230,28 @@ const MessageBox = ({ message }) => (
 
 const containerStyle = {
   display: "flex",
+  background: "linear-gradient(135deg, #E9F1FA, #00ABE4) no-repeat fixed",
   justifyContent: "center",
   alignItems: "center",
   height: "100vh",
-  background: "#111827",
 };
 
 const formStyle = {
-  background: "#1f2937",
+  background: "linear-gradient(343deg, #E9F1FA, #00ABE4) no-repeat fixed",
+  height: "400px",
+  width: "350px",
+  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+  backdropFilter: "blur(5px)",
   padding: "2rem",
   borderRadius: "1rem",
   color: "#f9fafb",
-  width: "300px",
   position: "relative",
 };
 
 const titleStyle = {
   textAlign: "center",
   marginBottom: "1rem",
-  color: "#facc15",
+  color: "snow",
 };
 
 const inputStyle = {
@@ -242,17 +259,19 @@ const inputStyle = {
   padding: "0.5rem",
   marginBottom: "0.5rem",
   borderRadius: "0.5rem",
-  border: "1px solid #facc15",
-  background: "#111827",
-  color: "#f9fafb",
+  border: "1px solid #rgb(222 232 255)",
+  background: "snow",
+  color: "snow",
+  fontWeight: "500",
 };
 
 const buttonStyle = {
   width: "100%",
   padding: "0.5rem",
   borderRadius: "0.5rem",
-  background: "#facc15",
-  color: "#111827",
+  background: "#00ABE4",
+  fontSize: "1rem", 
+  color: "snow",
   fontWeight: "bold",
   cursor: "pointer",
 };
