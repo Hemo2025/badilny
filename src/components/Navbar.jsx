@@ -104,7 +104,7 @@ export default function Navbar() {
           }),
         })}
       >
-        Badilny
+        بــــــدِّل
       </NavLink>
 
       <div
@@ -169,44 +169,10 @@ export default function Navbar() {
         )}
 
         {user && (
-          <NavLink
-            to="/traderequests"
-            style={({ isActive }) => ({
-              padding: "0.25rem 0.5rem", // أصغر شوي
-              color: "#f6f6f6",
-              background: "rgb(0, 171, 228) ",
-              fontWeight: "bold",
-              fontSize: "0.85rem",
-              borderRadius: "0.4rem",
-              cursor: "pointer",
-              position: "relative",
-              textAlign: "center",
-              transition: "all 0.2s ease",
-              ...(isActive && {
-                color: "#00ABE4",
-                backgroundColor: "#ffffff",
-                transform: "scale(1.01)",
-                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              }),
-            })}
-          >
+          <NavLink to="/traderequests" className="trade-btn">
             المقايضات
             {pendingTrades > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-6px",
-                  right: "-6px",
-                  background: "red",
-                  color: "#fff",
-                  borderRadius: "50%",
-                  padding: "0.15rem 0.4rem",
-                  fontSize: "0.7rem",
-                  fontWeight: "bold",
-                }}
-              >
-                {pendingTrades}
-              </span>
+              <span className="badge">{pendingTrades}</span>
             )}
           </NavLink>
         )}

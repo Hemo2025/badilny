@@ -68,7 +68,6 @@ nav a:hover::after {
 
 nav a:hover {
     color: #00ABE4 !important;
-    transform: scale(1.01);
     background-color: #ffffff;
     border-radius: 0.5rem;
     padding: 0.3rem 0.6rem;
@@ -148,7 +147,7 @@ button {
 }
 
 button:hover {
-    transform: skew(10deg) scale(1.05);
+    transform: skew(10deg) translateY(-4px) scale(1.05);
     box-shadow: 0 0 2px 0px #00ABE4;
 }
 
@@ -291,4 +290,48 @@ h2 {
     height: 100%;
     object-fit: cover;
     border-radius: 1rem;
+}
+
+/* الزر العادي */
+.trade-btn {
+    padding: 0.25rem 0.5rem;
+    color: #f6f6f6;
+    background: rgb(0, 171, 228);
+    font-weight: bold;
+    font-size: 0.85rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    position: relative;
+    text-align: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    /* NavLink بشكل عام يضيف underline */
+}
+
+/* عند hover */
+.trade-btn:hover {
+    background-color: snow;
+    color: #ffffff ;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* إذا كان active (React Router يضيف className 'active' تلقائيًا) */
+.trade-btn.active {
+    color: #00ABE4;
+    background-color: #ffffff;
+    transform: scale(1.01);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* الـ badge داخل الزر */
+.trade-btn .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 0.15rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: bold;
 }

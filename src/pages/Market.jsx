@@ -289,7 +289,7 @@ export default function Market() {
         {loading ? (
           <p style={styles.loadingText}>جاري التحميل...</p>
         ) : filteredItems.length === 0 ? (
-          <p style={styles.loadingText}>لا توجد أغراض مطابقة للفلاتر.</p>
+          <p style={styles.loadingText}>لا توجد أغراض ...</p>
         ) : (
           <div style={styles.gridContainer}>
             {filteredItems.map((item, idx) => (
@@ -422,7 +422,7 @@ const styles = {
   loadingText: {
     textAlign: "center",
     marginTop: "3rem",
-    color: "#fbbf24",
+    color: "snow",
     fontWeight: "bold",
   },
   lightbox: {

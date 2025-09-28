@@ -10,12 +10,13 @@ import ChatsList from "./pages/ChatsList";
 import Chat from "./pages/Chat";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "react-hot-toast";
+import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
   return (
     <AnimatePresence mode="wait">
       <Router>
-      <Toaster position="top-right" reverseOrder={false} />
+        <Toaster position="top-right" reverseOrder={false} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/market" element={<Market />} />
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/traderequests" element={<TradeRequests />} />
+          <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/chatslist" element={<ChatsList />} />
           <Route path="/chat/:chatId" element={<Chat />} />
         </Routes>

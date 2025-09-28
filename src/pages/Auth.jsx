@@ -4,9 +4,17 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  setDoc,
+} from "firebase/firestore";
 
 export default function Auth() {
   const [isSignup, setIsSignup] = useState(false);
@@ -17,6 +25,7 @@ export default function Auth() {
   const [newUser, setNewUser] = useState(null);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,17 +33,19 @@ export default function Auth() {
 
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => setMessage(null), 3000);
+      const timer = setTimeout(() => setMessage(null), 4000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  // تحديث Firestore في الخلفية بدون انتظار UI
+  // تحديث Firestore بدون انتظار UI
   const updateFirestoreAsync = async (user, displayName) => {
     try {
       const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
+      const userSnap = await getDocs(
+        query(collection(db, "users"), where("uid", "==", user.uid))
+      );
+      if (userSnap.empty) {
         await setDoc(userRef, {
           uid: user.uid,
           displayName: displayName || user.displayName || "مستخدم",
@@ -44,6 +55,22 @@ export default function Auth() {
       }
     } catch (err) {
       console.error("Firestore update failed:", err);
+    }
+  };
+
+  // تحقق من وجود البريد في Firestore
+  const isEmailRegistered = async (emailToCheck) => {
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(
+        usersRef,
+        where("email", "==", emailToCheck.toLowerCase())
+      );
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (err) {
+      console.error("Error checking email:", err);
+      return false;
     }
   };
 
@@ -57,12 +84,8 @@ export default function Auth() {
         password
       );
       const user = userCredential.user;
-
-      // نجاح فوري للواجهة
       setMessage({ type: "success", text: "تم تسجيل الدخول بنجاح!" });
       navigate(from);
-
-      // تحديث Firestore في الخلفية
       updateFirestoreAsync(user);
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -82,8 +105,6 @@ export default function Auth() {
       );
       setNewUser(userCredential.user);
       setShowNameInput(true);
-
-      // UI سريع: لا تنتظر Firestore
       setMessage({ type: "success", text: "تم إنشاء الحساب! الآن أدخل اسمك." });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -101,10 +122,7 @@ export default function Auth() {
     setLoading(true);
     try {
       await updateProfile(newUser, { displayName: name.trim() });
-
-      // Firestore في الخلفية
       updateFirestoreAsync(newUser, name.trim());
-
       setMessage({ type: "success", text: "تم حفظ الاسم بنجاح!" });
       navigate(from);
     } catch (error) {
@@ -114,9 +132,38 @@ export default function Auth() {
     }
   };
 
+  // إعادة تعيين كلمة المرور
+  const handleResetPassword = async () => {
+    if (!email.trim()) {
+      setMessage({ type: "error", text: "يرجى إدخال البريد الإلكتروني!" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const registered = await isEmailRegistered(email.toLowerCase());
+      if (!registered) {
+        setMessage({ type: "error", text: "الإيميل غير مسجل!" });
+        setLoading(false);
+        return;
+      }
+
+      await sendPasswordResetEmail(auth, email);
+      setMessage({
+        type: "success",
+        text: "تم إرسال رابط إعادة التعيين إلى بريدك!",
+      });
+      setResetMode(false);
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isSignup) handleSignUp();
+    if (resetMode) handleResetPassword();
+    else if (isSignup) handleSignUp();
     else handleSignIn();
   };
 
@@ -124,7 +171,11 @@ export default function Auth() {
     <div style={containerStyle}>
       <form style={formStyle} onSubmit={handleSubmit}>
         <h2 style={titleStyle}>
-          {isSignup ? "تسجيل حساب جديد" : "تسجيل الدخول"}
+          {resetMode
+            ? "إعادة تعيين كلمة المرور"
+            : isSignup
+            ? "تسجيل حساب جديد"
+            : "تسجيل الدخول"}
         </h2>
 
         {message && <MessageBox message={message} />}
@@ -160,38 +211,66 @@ export default function Auth() {
               style={inputStyle}
               disabled={loading}
             />
-            <input
-              type="password"
-              placeholder="كلمة المرور"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={inputStyle}
-              disabled={loading}
-            />
+            {!resetMode && (
+              <input
+                type="password"
+                placeholder="كلمة المرور"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={inputStyle}
+                disabled={loading}
+              />
+            )}
             <button type="submit" style={buttonStyle} disabled={loading}>
               {loading
-                ? isSignup
+                ? resetMode
+                  ? "جارٍ إرسال الرابط..."
+                  : isSignup
                   ? "جارٍ إنشاء الحساب..."
                   : "جارٍ تسجيل الدخول..."
+                : resetMode
+                ? "إرسال رابط إعادة التعيين"
                 : isSignup
                 ? "إنشاء حساب"
                 : "تسجيل الدخول"}
             </button>
+            {!resetMode && (
+              <p
+                style={{
+                  textAlign: "center",
+                  marginTop: "1rem",
+                  color: "#f1f5f9",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#00ABE4",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => setResetMode(true)}
+                >
+                  نسيت كلمة المرور؟
+                </span>
+              </p>
+            )}
             <p
               style={{
                 textAlign: "center",
-                marginTop: "5rem",
+                marginTop: "1rem",
                 fontSize: "0.9rem",
                 color: "#f1f5f9",
                 fontWeight: "900",
-                backdropFilter: "blur(5px)",}}
+                backdropFilter: "blur(5px)",
+              }}
             >
               {isSignup ? "لديك حساب؟" : "لا تملك حساب؟"}{" "}
               <span
                 onClick={() => {
                   setIsSignup(!isSignup);
                   setShowNameInput(false);
+                  setResetMode(false);
                 }}
                 style={{
                   color: "#00ABE4",
@@ -220,7 +299,6 @@ const MessageBox = ({ message }) => (
       borderRadius: "0.5rem",
       textAlign: "center",
       backgroundColor: message.type === "success" ? "#34d399" : "#f87171",
-
       fontWeight: "bold",
     }}
   >
@@ -238,7 +316,7 @@ const containerStyle = {
 
 const formStyle = {
   background: "linear-gradient(343deg, #E9F1FA, #00ABE4) no-repeat fixed",
-  height: "400px",
+  minHeight: "400px",
   width: "350px",
   boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
   backdropFilter: "blur(5px)",
@@ -261,7 +339,7 @@ const inputStyle = {
   borderRadius: "0.5rem",
   border: "1px solid #rgb(222 232 255)",
   background: "snow",
-  color: "snow",
+  color: "#1c0f0f",
   fontWeight: "500",
 };
 
@@ -270,7 +348,7 @@ const buttonStyle = {
   padding: "0.5rem",
   borderRadius: "0.5rem",
   background: "#00ABE4",
-  fontSize: "1rem", 
+  fontSize: "1rem",
   color: "snow",
   fontWeight: "bold",
   cursor: "pointer",
