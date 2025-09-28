@@ -14,7 +14,10 @@ import {
   getDocs,
   doc,
   setDoc,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
+import emailjs from "@emailjs/browser";
 
 export default function Auth() {
   const [isSignup, setIsSignup] = useState(false);
@@ -26,10 +29,13 @@ export default function Auth() {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/";
+  const from = location.state?.from || "/profile";
 
   useEffect(() => {
     if (message) {
@@ -38,7 +44,30 @@ export default function Auth() {
     }
   }, [message]);
 
-  // تحديث Firestore بدون انتظار UI
+  // -------------------------
+  // قائمة البريد المؤقت
+  // -------------------------
+  const disposableDomains = new Set([
+    "mailinator.com",
+    "10minutemail.com",
+    "tempmail.com",
+    "trashmail.com",
+    "guerrillamail.com",
+    "yopmail.com",
+  ]);
+
+  const isDisposableEmail = (emailStr) => {
+    try {
+      const domain = emailStr.split("@")[1].toLowerCase();
+      return disposableDomains.has(domain);
+    } catch {
+      return false;
+    }
+  };
+
+  // -------------------------
+  // تحديث Firestore
+  // -------------------------
   const updateFirestoreAsync = async (user, displayName) => {
     try {
       const userRef = doc(db, "users", user.uid);
@@ -49,7 +78,7 @@ export default function Auth() {
         await setDoc(userRef, {
           uid: user.uid,
           displayName: displayName || user.displayName || "مستخدم",
-          email: user.email,
+          email: user.email ? user.email.toLowerCase() : "",
           createdAt: new Date(),
         });
       }
@@ -58,7 +87,9 @@ export default function Auth() {
     }
   };
 
-  // تحقق من وجود البريد في Firestore
+  // -------------------------
+  // التحقق من تسجيل البريد
+  // -------------------------
   const isEmailRegistered = async (emailToCheck) => {
     try {
       const usersRef = collection(db, "users");
@@ -74,16 +105,19 @@ export default function Auth() {
     }
   };
 
+  // -------------------------
   // تسجيل الدخول
+  // -------------------------
   const handleSignIn = async () => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password
       );
       const user = userCredential.user;
+      await user.reload();
       setMessage({ type: "success", text: "تم تسجيل الدخول بنجاح!" });
       navigate(from);
       updateFirestoreAsync(user);
@@ -94,18 +128,49 @@ export default function Auth() {
     }
   };
 
-  // إنشاء حساب جديد
+  // -------------------------
+  // تسجيل حساب جديد مع التحقق بالرمز
+  // -------------------------
   const handleSignUp = async () => {
+    if (isDisposableEmail(email)) {
+      setMessage({
+        type: "error",
+        text: "الرجاء استخدام بريد حقيقي (غير مؤقت).",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password
       );
-      setNewUser(userCredential.user);
-      setShowNameInput(true);
-      setMessage({ type: "success", text: "تم إنشاء الحساب! الآن أدخل اسمك." });
+      const user = userCredential.user;
+      setNewUser(user);
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedCode(code);
+
+      await addDoc(collection(db, "emailVerification"), {
+        uid: user.uid,
+        code,
+        createdAt: serverTimestamp(),
+      });
+
+      await emailjs.send(
+        "service_bchvqoe",
+        "template_svlws3c",
+        { user_email: email, otp_code: code },
+        "rV01AhweJSjgaU6Q6"
+      );
+
+      setShowCodeInput(true);
+      setMessage({
+        type: "success",
+        text: "تم إرسال رمز التحقق إلى بريدك. الرجاء إدخاله هنا.",
+      });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     } finally {
@@ -113,7 +178,32 @@ export default function Auth() {
     }
   };
 
-  // حفظ الاسم
+  // -------------------------
+  // التحقق من الرمز
+  // -------------------------
+  const handleVerifyCode = async () => {
+    if (verificationCode.trim() !== generatedCode) {
+      setMessage({ type: "error", text: "الرمز غير صحيح!" });
+      return;
+    }
+    setLoading(true);
+    try {
+      setShowCodeInput(false);
+      setShowNameInput(true);
+      setMessage({
+        type: "success",
+        text: "تم التحقق من بريدك، يمكنك الآن إدخال اسمك.",
+      });
+    } catch (error) {
+      setMessage({ type: "error", text: "حدث خطأ أثناء التحقق!" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // -------------------------
+  // حفظ الاسم بعد التحقق
+  // -------------------------
   const handleSaveName = async () => {
     if (!name.trim() || !newUser) {
       setMessage({ type: "error", text: "يرجى إدخال الاسم!" });
@@ -132,7 +222,9 @@ export default function Auth() {
     }
   };
 
+  // -------------------------
   // إعادة تعيين كلمة المرور
+  // -------------------------
   const handleResetPassword = async () => {
     if (!email.trim()) {
       setMessage({ type: "error", text: "يرجى إدخال البريد الإلكتروني!" });
@@ -146,8 +238,7 @@ export default function Auth() {
         setLoading(false);
         return;
       }
-
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, email.trim());
       setMessage({
         type: "success",
         text: "تم إرسال رابط إعادة التعيين إلى بريدك!",
@@ -160,9 +251,14 @@ export default function Auth() {
     }
   };
 
+  // -------------------------
+  // معالجة النموذج
+  // -------------------------
   const handleSubmit = (e) => {
     e.preventDefault();
     if (resetMode) handleResetPassword();
+    else if (showCodeInput) handleVerifyCode();
+    else if (showNameInput) handleSaveName();
     else if (isSignup) handleSignUp();
     else handleSignIn();
   };
@@ -180,7 +276,23 @@ export default function Auth() {
 
         {message && <MessageBox message={message} />}
 
-        {showNameInput ? (
+        {showCodeInput ? (
+          <>
+            <input
+              type="text"
+              placeholder="أدخل رمز التحقق المرسل للبريد"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              required
+              style={inputStyle}
+              disabled={loading}
+            />
+            <HoverButton
+              text={loading ? "جارٍ التحقق..." : "تحقق من الرمز"}
+              loading={loading}
+            />
+          </>
+        ) : showNameInput ? (
           <>
             <input
               type="text"
@@ -191,14 +303,10 @@ export default function Auth() {
               style={inputStyle}
               disabled={loading}
             />
-            <button
-              type="button"
-              onClick={handleSaveName}
-              style={buttonStyle}
-              disabled={loading}
-            >
-              {loading ? "جارٍ الحفظ..." : "حفظ الاسم"}
-            </button>
+            <HoverButton
+              text={loading ? "جارٍ الحفظ..." : "حفظ الاسم"}
+              loading={loading}
+            />
           </>
         ) : (
           <>
@@ -222,63 +330,37 @@ export default function Auth() {
                 disabled={loading}
               />
             )}
-            <button type="submit" style={buttonStyle} disabled={loading}>
-              {loading
-                ? resetMode
-                  ? "جارٍ إرسال الرابط..."
+            <HoverButton
+              text={
+                loading
+                  ? resetMode
+                    ? "جارٍ إرسال الرابط..."
+                    : isSignup
+                    ? "جارٍ إنشاء الحساب..."
+                    : "جارٍ تسجيل الدخول..."
+                  : resetMode
+                  ? "إرسال رابط إعادة التعيين"
                   : isSignup
-                  ? "جارٍ إنشاء الحساب..."
-                  : "جارٍ تسجيل الدخول..."
-                : resetMode
-                ? "إرسال رابط إعادة التعيين"
-                : isSignup
-                ? "إنشاء حساب"
-                : "تسجيل الدخول"}
-            </button>
+                  ? "إنشاء حساب"
+                  : "تسجيل الدخول"
+              }
+              loading={loading}
+            />
             {!resetMode && (
-              <p
-                style={{
-                  textAlign: "center",
-                  marginTop: "1rem",
-                  color: "#f1f5f9",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#00ABE4",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => setResetMode(true)}
-                >
-                  نسيت كلمة المرور؟
-                </span>
+              <p style={forgotStyle} onClick={() => setResetMode(true)}>
+                نسيت كلمة المرور؟
               </p>
             )}
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: "1rem",
-                fontSize: "0.9rem",
-                color: "#f1f5f9",
-                fontWeight: "900",
-                backdropFilter: "blur(5px)",
-              }}
-            >
+            <p style={switchStyle}>
               {isSignup ? "لديك حساب؟" : "لا تملك حساب؟"}{" "}
               <span
                 onClick={() => {
                   setIsSignup(!isSignup);
                   setShowNameInput(false);
                   setResetMode(false);
+                  setShowCodeInput(false);
                 }}
-                style={{
-                  color: "#00ABE4",
-                  cursor: "pointer",
-                  fontSize: "1rem",
-                  backdropFilter: "blur(5px)",
-                  fontWeight: "bold",
-                }}
+                style={switchSpanStyle}
               >
                 {isSignup ? "تسجيل الدخول" : "إنشاء حساب"}
               </span>
@@ -290,66 +372,149 @@ export default function Auth() {
   );
 }
 
-// رسالة تنبيه
+// -----------------------------
+// Hover Button مع Spinner
+// -----------------------------
+const HoverButton = ({ text, loading }) => {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      style={{
+        ...buttonStyle,
+        background: hover ? "#0086b3" : "#00ABE4",
+        transform: hover ? "scale(1.05)" : "scale(1)",
+        boxShadow: hover
+          ? "0 6px 20px rgba(0,0,0,0.35)"
+          : "0 2px 8px rgba(0,0,0,0.2)",
+        transition: "all 0.3s ease",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "0.6rem",
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {loading && <Spinner />}
+      {text}
+    </button>
+  );
+};
+
+// -----------------------------
+// Spinner دائري
+// -----------------------------
+const Spinner = () => (
+  <div
+    style={{
+      width: "20px",
+      height: "20px",
+      border: "3px solid rgba(255,255,255,0.3)",
+      borderTop: "3px solid white",
+      borderRadius: "50%",
+      animation: "spin 1s linear infinite",
+    }}
+  />
+);
+
+// -----------------------------
+// إضافة keyframes للـspinner
+// -----------------------------
+const styleSheet = document.styleSheets[0];
+const keyframes = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+
+// -----------------------------
+// رسالة التنبيه
+// -----------------------------
 const MessageBox = ({ message }) => (
   <div
     style={{
       marginBottom: "1rem",
-      padding: "0.5rem",
-      borderRadius: "0.5rem",
+      padding: "0.7rem 1rem",
+      borderRadius: "0.7rem",
       textAlign: "center",
       backgroundColor: message.type === "success" ? "#34d399" : "#f87171",
       fontWeight: "bold",
+      boxShadow: "0 3px 15px rgba(0,0,0,0.15)",
+      transition: "all 0.3s ease",
     }}
   >
     {message.text}
   </div>
 );
 
+// -----------------------------
+// الأنماط
+// -----------------------------
 const containerStyle = {
   display: "flex",
-  background: "linear-gradient(135deg, #E9F1FA, #00ABE4) no-repeat fixed",
   justifyContent: "center",
   alignItems: "center",
   height: "100vh",
+  background: "radial-gradient(circle at top left, #00ABE4, #E9F1FA)",
 };
-
 const formStyle = {
-  background: "linear-gradient(343deg, #E9F1FA, #00ABE4) no-repeat fixed",
-  minHeight: "400px",
-  width: "350px",
-  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-  backdropFilter: "blur(5px)",
-  padding: "2rem",
-  borderRadius: "1rem",
-  color: "#f9fafb",
+  width: "400px",
+  background: "white",
+  padding: "3rem",
+  borderRadius: "2rem",
+  boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
   position: "relative",
 };
-
 const titleStyle = {
   textAlign: "center",
-  marginBottom: "1rem",
-  color: "snow",
+  marginBottom: "2rem",
+  fontSize: "2rem",
+  fontWeight: "800",
+  color: "#00ABE4",
 };
-
 const inputStyle = {
   width: "100%",
-  padding: "0.5rem",
-  marginBottom: "0.5rem",
-  borderRadius: "0.5rem",
-  border: "1px solid #rgb(222 232 255)",
-  background: "snow",
-  color: "#1c0f0f",
+  padding: "0.9rem 1.2rem",
+  marginBottom: "1.2rem",
+  borderRadius: "1rem",
+  border: "1px solid #ddd",
+  background: "#f7f9fb",
   fontWeight: "500",
+  fontSize: "1rem",
+  color: "#555",
+  outline: "none",
+  transition: "all 0.3s ease",
 };
-
 const buttonStyle = {
   width: "100%",
-  padding: "0.5rem",
-  borderRadius: "0.5rem",
+  padding: "0.9rem",
+  borderRadius: "1rem",
   background: "#00ABE4",
-  fontSize: "1rem",
-  color: "snow",
+  fontSize: "1.15rem",
+  color: "white",
   fontWeight: "bold",
   cursor: "pointer",
+  border: "none",
+};
+const forgotStyle = {
+  textAlign: "center",
+  marginTop: "1rem",
+  color: "#00ABE4",
+  cursor: "pointer",
+  fontWeight: "bold",
+  textDecoration: "underline",
+};
+const switchStyle = {
+  textAlign: "center",
+  marginTop: "1rem",
+  fontSize: "1rem",
+  color: "#555",
+  fontWeight: "600",
+};
+const switchSpanStyle = {
+  color: "#00ABE4",
+  cursor: "pointer",
+  fontWeight: "800",
 };

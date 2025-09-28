@@ -103,21 +103,6 @@ export default function Profile() {
         <h2 style={{ color: "snow" }}>
           أهلاً، {user.displayName || user.email}
         </h2>
-        <button
-          onClick={handleLogout}
-          style={{
-            marginBottom: "1rem",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.5rem",
-            background: "#00ABE4",
-            color: "#fff",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          تسجيل الخروج
-        </button>
         <div
           style={{
             display: "grid",
