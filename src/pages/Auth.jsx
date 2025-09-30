@@ -45,8 +45,7 @@ export default function Auth() {
   }, [message]);
 
   // -------------------------
-  // قائمة البريد المؤقت
-  // -------------------------
+  // البريد المؤقت
   const disposableDomains = new Set([
     "mailinator.com",
     "10minutemail.com",
@@ -55,7 +54,6 @@ export default function Auth() {
     "guerrillamail.com",
     "yopmail.com",
   ]);
-
   const isDisposableEmail = (emailStr) => {
     try {
       const domain = emailStr.split("@")[1].toLowerCase();
@@ -67,7 +65,6 @@ export default function Auth() {
 
   // -------------------------
   // تحديث Firestore
-  // -------------------------
   const updateFirestoreAsync = async (user, displayName) => {
     try {
       const userRef = doc(db, "users", user.uid);
@@ -89,7 +86,6 @@ export default function Auth() {
 
   // -------------------------
   // التحقق من تسجيل البريد
-  // -------------------------
   const isEmailRegistered = async (emailToCheck) => {
     try {
       const usersRef = collection(db, "users");
@@ -107,7 +103,6 @@ export default function Auth() {
 
   // -------------------------
   // تسجيل الدخول
-  // -------------------------
   const handleSignIn = async () => {
     setLoading(true);
     try {
@@ -129,8 +124,7 @@ export default function Auth() {
   };
 
   // -------------------------
-  // تسجيل حساب جديد مع التحقق بالرمز
-  // -------------------------
+  // تسجيل حساب جديد + التحقق
   const handleSignUp = async () => {
     if (isDisposableEmail(email)) {
       setMessage({
@@ -180,7 +174,6 @@ export default function Auth() {
 
   // -------------------------
   // التحقق من الرمز
-  // -------------------------
   const handleVerifyCode = async () => {
     if (verificationCode.trim() !== generatedCode) {
       setMessage({ type: "error", text: "الرمز غير صحيح!" });
@@ -203,7 +196,6 @@ export default function Auth() {
 
   // -------------------------
   // حفظ الاسم بعد التحقق
-  // -------------------------
   const handleSaveName = async () => {
     if (!name.trim() || !newUser) {
       setMessage({ type: "error", text: "يرجى إدخال الاسم!" });
@@ -224,7 +216,6 @@ export default function Auth() {
 
   // -------------------------
   // إعادة تعيين كلمة المرور
-  // -------------------------
   const handleResetPassword = async () => {
     if (!email.trim()) {
       setMessage({ type: "error", text: "يرجى إدخال البريد الإلكتروني!" });
@@ -253,7 +244,6 @@ export default function Auth() {
 
   // -------------------------
   // معالجة النموذج
-  // -------------------------
   const handleSubmit = (e) => {
     e.preventDefault();
     if (resetMode) handleResetPassword();
@@ -265,6 +255,23 @@ export default function Auth() {
 
   return (
     <div style={containerStyle}>
+      {/* فيديو خلفية */}
+      <video
+        src="/video.mp4"
+        autoPlay
+        loop
+        muted
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+        }}
+      />
+
       <form style={formStyle} onSubmit={handleSubmit}>
         <h2 style={titleStyle}>
           {resetMode
@@ -374,7 +381,6 @@ export default function Auth() {
 
 // -----------------------------
 // Hover Button مع Spinner
-// -----------------------------
 const HoverButton = ({ text, loading }) => {
   const [hover, setHover] = useState(false);
   return (
@@ -405,7 +411,6 @@ const HoverButton = ({ text, loading }) => {
 
 // -----------------------------
 // Spinner دائري
-// -----------------------------
 const Spinner = () => (
   <div
     style={{
@@ -420,15 +425,13 @@ const Spinner = () => (
 );
 
 // -----------------------------
-// إضافة keyframes للـspinner
-// -----------------------------
+// keyframes للـspinner
 const styleSheet = document.styleSheets[0];
 const keyframes = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
 styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
 
 // -----------------------------
 // رسالة التنبيه
-// -----------------------------
 const MessageBox = ({ message }) => (
   <div
     style={{
@@ -448,71 +451,84 @@ const MessageBox = ({ message }) => (
 
 // -----------------------------
 // الأنماط
-// -----------------------------
 const containerStyle = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   height: "100vh",
-  background: "radial-gradient(circle at top left, #00ABE4, #E9F1FA)",
+  position: "relative",
+  overflow: "hidden",
+  padding: "1rem",
 };
+
 const formStyle = {
-  width: "400px",
-  background: "white",
-  padding: "3rem",
+  width: "100%",
+  maxWidth: "400px",
+  background: "rgba(255, 255, 255, 0.3)", // شفاف جزئياً
+  padding: "2.5rem 1.5rem",
   borderRadius: "2rem",
   boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   position: "relative",
+  zIndex: 1,
+  boxSizing: "border-box",
+  backdropFilter: "blur(0px)", // يضمن عدم تأثير البلو على العناصر الداخلية
 };
+
 const titleStyle = {
   textAlign: "center",
-  marginBottom: "2rem",
-  fontSize: "2rem",
+  marginBottom: "1.8rem",
+  fontSize: "1.8rem",
   fontWeight: "800",
   color: "#00ABE4",
 };
+
 const inputStyle = {
   width: "100%",
-  padding: "0.9rem 1.2rem",
-  marginBottom: "1.2rem",
-  borderRadius: "1rem",
+  padding: "0.8rem 1rem",
+  marginBottom: "1rem",
+  borderRadius: "0.9rem",
   border: "1px solid #ddd",
   background: "#f7f9fb",
   fontWeight: "500",
-  fontSize: "1rem",
+  fontSize: "0.95rem",
   color: "#555",
   outline: "none",
   transition: "all 0.3s ease",
 };
+
 const buttonStyle = {
   width: "100%",
-  padding: "0.9rem",
-  borderRadius: "1rem",
+  padding: "0.85rem",
+  borderRadius: "0.9rem",
   background: "#00ABE4",
-  fontSize: "1.15rem",
+  fontSize: "1.05rem",
   color: "white",
   fontWeight: "bold",
   cursor: "pointer",
   border: "none",
 };
+
 const forgotStyle = {
   textAlign: "center",
-  marginTop: "1rem",
+  marginTop: "0.9rem",
   color: "#00ABE4",
   cursor: "pointer",
   fontWeight: "bold",
   textDecoration: "underline",
+  fontSize: "0.9rem",
 };
+
 const switchStyle = {
   textAlign: "center",
   marginTop: "1rem",
-  fontSize: "1rem",
+  fontSize: "0.95rem",
   color: "#555",
   fontWeight: "600",
 };
+
 const switchSpanStyle = {
   color: "#00ABE4",
   cursor: "pointer",
