@@ -4,6 +4,7 @@ import ItemCard from "../components/ItemCard";
 import PageWrapper from "../components/PageWrapper";
 import { db } from "../firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 export default function Market() {
   const [items, setItems] = useState([]);
@@ -18,6 +19,7 @@ export default function Market() {
   const [sortByDistance, setSortByDistance] = useState(false);
 
   const containerRef = useRef(null);
+  const navigate = useNavigate();
 
   const allCategories = [
     { value: "👕 ملابس", label: "👕 ملابس" },
@@ -44,12 +46,11 @@ export default function Market() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        (pos) =>
           setUserLocation({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
-          });
-        },
+          }),
         (err) => console.error("خطأ في تحديد الموقع:", err),
         { enableHighAccuracy: true }
       );
@@ -88,6 +89,7 @@ export default function Market() {
           };
         });
 
+        // العناصر المميزة أولًا
         list.sort((a, b) =>
           a.featured === b.featured ? 0 : a.featured ? -1 : 1
         );
@@ -133,25 +135,25 @@ export default function Market() {
     const matchesSearch = item.name
       ?.toLowerCase()
       .includes(search.toLowerCase());
-
     const matchesCategory =
       categories.length === 0 || categories.includes(item.category || "");
-
     const matchesRegion =
       regions.length === 0 || regions.includes(item.region || "");
-
     const matchesFeatured = tab === "featured" ? item.featured : true;
-
     return matchesSearch && matchesCategory && matchesRegion && matchesFeatured;
   });
 
-  if (sortByDistance && userLocation) {
-    filteredItems = filteredItems.sort((a, b) => {
+  // ===== ترتيب العناصر =====
+  filteredItems = filteredItems.sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    if (sortByDistance && userLocation) {
       if (a.distanceKm === null) return 1;
       if (b.distanceKm === null) return -1;
       return a.distanceKm - b.distanceKm;
-    });
-  }
+    }
+    return 0;
+  });
 
   return (
     <PageWrapper>
@@ -181,12 +183,11 @@ export default function Market() {
               </button>
             ))}
           </div>
-          {/* زر الأقرب إلي */}
           <button
             onClick={() => setSortByDistance(!sortByDistance)}
             style={{
               ...styles.distanceButton,
-              background: sortByDistance ? "#00ABE4" : "#1f2937", // أصفر عند التحديد، داكن عادي
+              background: sortByDistance ? "#00ABE4" : "#1f2937",
               color: sortByDistance ? "snow" : "#f9fafb",
               boxShadow: sortByDistance
                 ? "0 4px 12px rgba(251, 191, 36, 0.6)"
@@ -217,7 +218,6 @@ export default function Market() {
             overflow: "hidden",
           }}
         >
-          {/* Search داخل الفلتر */}
           <div style={styles.filterSearch}>
             <input
               type="text"
@@ -292,12 +292,17 @@ export default function Market() {
           <p style={styles.loadingText}>لا توجد أغراض ...</p>
         ) : (
           <div style={styles.gridContainer}>
-            {filteredItems.map((item, idx) => (
-              <ItemCard
-                key={idx}
-                item={item}
-                onImageClick={() => setPreviewImage(item.image)}
-              />
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => navigate(`/item/${item.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <ItemCard
+                  item={item}
+                  onImageClick={() => setPreviewImage(item.image)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -323,11 +328,8 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -370,7 +372,6 @@ const styles = {
     letterSpacing: "0.5px",
     textTransform: "uppercase",
   },
-
   filtersContainer: {
     display: "flex",
     gap: "1rem",
@@ -418,6 +419,7 @@ const styles = {
     display: "grid",
     gap: "1rem",
     gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+    gridAutoRows: "1fr",
   },
   loadingText: {
     textAlign: "center",

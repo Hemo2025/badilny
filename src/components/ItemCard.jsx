@@ -22,6 +22,7 @@ export default function ItemCard({ item }) {
   const tradeFormRef = useRef(null);
   const tradeButtonRef = useRef(null);
 
+  // ===== تحميل بيانات المستخدم وأغراضه =====
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
@@ -33,21 +34,19 @@ export default function ItemCard({ item }) {
             where("userId", "==", currentUser.uid)
           );
           const snapshot = await getDocs(q);
-          const data = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setMyItems(data);
+          setMyItems(
+            snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          );
         };
         fetchMyItems();
       }
 
+      // حساب المسافة بين المستخدم والعنصر
       if (navigator.geolocation && item.location) {
         navigator.geolocation.getCurrentPosition((pos) => {
           const userLat = pos.coords.latitude;
           const userLng = pos.coords.longitude;
           const { lat, lng } = item.location;
-
           const distance = getDistanceFromLatLonInKm(
             userLat,
             userLng,
@@ -59,6 +58,7 @@ export default function ItemCard({ item }) {
       }
     });
 
+    // إغلاق نموذج المقايضة عند النقر خارجها
     const handleClickOutside = (e) => {
       if (
         tradeFormRef.current &&
@@ -70,6 +70,7 @@ export default function ItemCard({ item }) {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       unsubscribe();
       document.removeEventListener("mousedown", handleClickOutside);
@@ -82,6 +83,7 @@ export default function ItemCard({ item }) {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  // إرسال طلب المقايضة
   const handleTradeRequest = async () => {
     if (!user) return showToastMsg("يجب تسجيل الدخول!");
     if (!selectedItem) return showToastMsg("اختر غرضك أولاً!");
@@ -106,31 +108,7 @@ export default function ItemCard({ item }) {
     }
   };
 
-  const formatDate = (timestamp) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const isToday =
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth() &&
-      date.getDate() === now.getDate();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const isYesterday =
-      date.getFullYear() === yesterday.getFullYear() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getDate() === yesterday.getDate();
-
-    const timeStr = date.toLocaleTimeString("ar-SA", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    if (isToday) return `اليوم ${timeStr}`;
-    if (isYesterday) return `أمس ${timeStr}`;
-    const options = { day: "2-digit", month: "short", year: "numeric" };
-    return `${date.toLocaleDateString("en-US", options)} ${timeStr}`;
-  };
-
+  // حساب المسافة
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
@@ -152,53 +130,26 @@ export default function ItemCard({ item }) {
     <div style={cardStyle}>
       {showToast && <div style={toastStyle}>{toastMessage}</div>}
 
+      {/* صورة العنصر */}
       <div style={{ position: "relative" }}>
         <img
           src={item.image}
           alt={item.name}
-          style={{
-            width: "100%",
-            height: "200px",
-            objectFit: "cover",
-            borderRadius: "0.5rem",
-            cursor: "pointer",
-          }}
+          style={imageStyle}
           onClick={() => setLightboxOpen(true)}
         />
         {item.featured && <div style={featuredBadgeStyle}>⭐ مميز</div>}
       </div>
 
-      {/* تفاصيل الغرض */}
+      {/* تفاصيل العنصر */}
       <div style={{ marginTop: "0.5rem" }}>
-        <h3 style={{ color: "#00ABE4" }}>{item.name}</h3>
-        <p
-          style={{
-            fontSize: "0.9rem",
-            background: "#1e293b",
-            padding: "3px 10px 3px 5px",
-            marginBottom: "0.3rem",
-            borderRadius: "0.5rem",
-            backgroundColor: "rgb(136 212 241)",
-          }}
-        >
-          {item.desc}
-        </p>
-        {item.category && <p style={infoStyle}>التصنيف : "{item.category}"</p>}
+        <h3 style={titleStyle}>{item.name}</h3>
+        <p style={descStyle}>{item.desc}</p>
+        {item.category && <p style={infoStyle}>التصنيف: {item.category}</p>}
         {item.region && <p style={infoStyle}>📍 {item.region}</p>}
         {item.addressDesc && <p style={infoStyle}>الحي: {item.addressDesc}</p>}
         {distanceKm && <p style={infoStyle}>🛣️ على بعد {distanceKm} كم</p>}
         {item.userName && <p style={infoStyle}>بواسطة: {item.userName}</p>}
-        {item.createdAt && (
-          <p
-            style={{
-              fontSize: "0.7rem",
-              color: "#4B5563",
-              marginBottom: "0.2rem",
-            }}
-          >
-            أضيف بتاريخ: {formatDate(item.createdAt)}
-          </p>
-        )}
       </div>
 
       {/* زر المقايضة */}
@@ -206,8 +157,8 @@ export default function ItemCard({ item }) {
         <>
           <button
             ref={tradeButtonRef}
-            onClick={() => setShowTradeForm((prev) => !prev)}
             style={tradeButtonStyle}
+            onClick={() => setShowTradeForm((prev) => !prev)}
           >
             أرغب بالمقايضة
           </button>
@@ -226,32 +177,24 @@ export default function ItemCard({ item }) {
                 key={myItem.id}
                 onClick={() => setSelectedItem(myItem.id)}
                 style={{
-                  padding: "0.5rem",
-                  borderRadius: "0.5rem",
-                  background:
-                    selectedItem === myItem.id ? "#facc15" : "#111827",
-                  color: "#fff",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  transition: "0.2s",
+                  ...myItemStyle,
+                  border:
+                    selectedItem === myItem.id
+                      ? "2px solid #00ABE4"
+                      : "2px solid transparent",
                 }}
               >
                 <img
                   src={myItem.image}
                   alt={myItem.name}
-                  style={{
-                    width: "100%",
-                    height: "80px",
-                    objectFit: "cover",
-                    borderRadius: "0.3rem",
-                  }}
+                  style={myItemImgStyle}
                 />
                 <p style={{ fontSize: "0.8rem", marginTop: "0.3rem" }}>
                   {myItem.name}
                 </p>
               </div>
             ))}
-            <button onClick={handleTradeRequest} style={sendButtonStyle}>
+            <button style={sendButtonStyle} onClick={handleTradeRequest}>
               إرسال الطلب
             </button>
           </div>
@@ -261,15 +204,7 @@ export default function ItemCard({ item }) {
       {/* Lightbox */}
       {lightboxOpen && (
         <div style={lightboxStyle} onClick={() => setLightboxOpen(false)}>
-          <img
-            src={item.image}
-            alt={item.name}
-            style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              borderRadius: "0.5rem",
-            }}
-          />
+          <img src={item.image} alt={item.name} style={lightboxImgStyle} />
         </div>
       )}
     </div>
@@ -281,8 +216,8 @@ const cardStyle = {
   background: "#F9FAFB",
   padding: "1rem",
   borderRadius: "0.75rem",
-  color: "#f9fafb",
-  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+  color: "#111827",
+  boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
   transition: "0.2s",
   position: "relative",
 };
@@ -296,15 +231,39 @@ const toastStyle = {
   padding: "0.5rem 1rem",
   borderRadius: "0.5rem",
   fontWeight: "bold",
-  boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-  zIndex: 100,
+  boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+  zIndex: 1000,
+};
+const imageStyle = {
+  width: "100%",
+  height: "200px",
+  objectFit: "cover",
+  borderRadius: "0.5rem",
+  cursor: "pointer",
+};
+const titleStyle = {
+  color: "#00ABE4",
+  fontSize: "1.2rem",
+  marginBottom: "0.3rem",
+};
+const descStyle = {
+  fontSize: "0.9rem",
+  background: "#E0F2FE",
+  padding: "5px 10px",
+  borderRadius: "0.5rem",
+  marginBottom: "0.3rem",
+};
+const infoStyle = {
+  fontSize: "0.8rem",
+  color: "#4B5563",
+  marginBottom: "0.3rem",
 };
 const featuredBadgeStyle = {
   position: "absolute",
   top: "10px",
   right: "10px",
   background: "#03a9f4",
-  color: "white",
+  color: "#fff",
   padding: "0.2rem 0.5rem",
   borderRadius: "0.5rem",
   fontWeight: "bold",
@@ -324,23 +283,33 @@ const tradeButtonStyle = {
 const tradeFormStyle = {
   marginTop: "0.5rem",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(120px,1fr))",
   gap: "0.5rem",
   transition: "all 0.3s ease",
 };
+const myItemStyle = {
+  padding: "0.5rem",
+  borderRadius: "0.5rem",
+  cursor: "pointer",
+  background: "#111827",
+  color: "#fff",
+  textAlign: "center",
+  transition: "0.2s",
+};
+const myItemImgStyle = {
+  width: "100%",
+  height: "80px",
+  objectFit: "cover",
+  borderRadius: "0.3rem",
+};
 const sendButtonStyle = {
-  gridColumn: "1 / -1",
+  gridColumn: "1/-1",
   padding: "0.5rem",
   borderRadius: "0.5rem",
   background: "#facc15",
   color: "#111827",
   fontWeight: "bold",
   cursor: "pointer",
-};
-const infoStyle = {
-  fontSize: "0.8rem",
-  color: "#4B5563",
-  marginBottom: "0.3rem",
 };
 const lightboxStyle = {
   position: "fixed",
@@ -354,4 +323,9 @@ const lightboxStyle = {
   alignItems: "center",
   zIndex: 9999,
   cursor: "pointer",
+};
+const lightboxImgStyle = {
+  maxWidth: "90%",
+  maxHeight: "90%",
+  borderRadius: "0.5rem",
 };

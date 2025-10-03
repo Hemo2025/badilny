@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import ResetPassword from "./pages/ResetPassword";
+import DetailItem from "./pages/DetailItem";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/market" element={<Market />} />
+          <Route path="/item/:itemId" element={<DetailItem />} />
           <Route path="/add" element={<AddItem />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />

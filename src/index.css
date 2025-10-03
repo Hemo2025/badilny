@@ -28,7 +28,7 @@ nav {
     align-items: center;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
     position: sticky;
-    top: 0;
+    /* top: 0; */
     z-index: 100;
     border-bottom: 1px solid snow;
     border-radius: 0 0 20px 20px;
@@ -135,7 +135,7 @@ nav a:hover {
 
 /* الأزرار المتوهجة */
 button {
-    background: linear-gradient(135deg, #f59e0b, #b45309);
+    /* background: linear-gradient(135deg, #f59e0b, #b45309); */
     color: #fff;
     padding: 0.8rem 1.6rem;
     border: none;
@@ -311,7 +311,7 @@ h2 {
 /* عند hover */
 .trade-btn:hover {
     background-color: snow;
-    color: #ffffff ;
+    color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -334,4 +334,19 @@ h2 {
     padding: 0.15rem 0.4rem;
     font-size: 0.7rem;
     font-weight: bold;
+}
+
+
+.card img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    .card img {
+        width: 100px;
+        height: 100px;
+    }
 }
