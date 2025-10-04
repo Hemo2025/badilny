@@ -29,11 +29,12 @@ export default function App() {
 
     const fetchVersion = async () => {
       try {
-        const response = await fetch("/version.json");
+        // ✅ استخدم الرابط الكامل للـ version.json على السيرفر
+        const response = await fetch("https://example.com/version.json");
         const data = await response.json();
         setUpdateUrl(data.updateUrl);
 
-        // اجعل الشاشة تظهر دائمًا للتجربة
+        // ✅ للتجربة: تظهر الشاشة فورًا
         setShowUpdate(true);
       } catch (err) {
         console.log("خطأ في قراءة version.json:", err);
@@ -43,11 +44,12 @@ export default function App() {
     fetchVersion();
   }, [isMobileApp]);
 
+  // شاشة التحديث
   if (showUpdate && isMobileApp) {
     return (
       <UpdateScreen
         updateUrl={updateUrl}
-        onClose={() => setShowUpdate(false)}
+        onClose={() => setShowUpdate(false)} // زر "لاحقًا"
       />
     );
   }
