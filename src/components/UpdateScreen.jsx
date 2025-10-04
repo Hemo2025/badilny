@@ -1,68 +1,48 @@
 import React from "react";
 
 export default function UpdateScreen({ updateUrl, onClose }) {
-  const handleUpdate = () => {
-    window.open(updateUrl, "_system"); // يفتح الرابط في المتصفح
-  };
-
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🚀 تحديث جديد متاح</h1>
-      <p style={styles.text}>
-        يوجد إصدار جديد من التطبيق. يرجى التحديث للاستمرار.
-      </p>
-
-      <div style={styles.btnRow}>
-        <button style={styles.buttonPrimary} onClick={handleUpdate}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0,0,0,0.8)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "#fff",
+        zIndex: 9999,
+      }}
+    >
+      <h1>يوجد تحديث جديد</h1>
+      <p>للحصول على أفضل تجربة، يرجى تحديث التطبيق.</p>
+      <div style={{ marginTop: 20 }}>
+        <button
+          style={{
+            padding: "10px 20px",
+            marginRight: 10,
+            fontSize: 16,
+            cursor: "pointer",
+          }}
+          onClick={() => window.open(updateUrl, "_blank")}
+        >
           تحديث الآن
         </button>
-        <button style={styles.buttonSecondary} onClick={onClose}>
+        <button
+          style={{
+            padding: "10px 20px",
+            fontSize: 16,
+            cursor: "pointer",
+          }}
+          onClick={onClose}
+        >
           لاحقًا
         </button>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f4f6f8",
-    textAlign: "center",
-    padding: "20px",
-  },
-  title: {
-    fontSize: "24px",
-    marginBottom: "10px",
-  },
-  text: {
-    fontSize: "16px",
-    marginBottom: "20px",
-  },
-  btnRow: {
-    display: "flex",
-    gap: "10px",
-  },
-  buttonPrimary: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    padding: "12px 20px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    cursor: "pointer",
-  },
-  buttonSecondary: {
-    backgroundColor: "#ddd",
-    color: "#333",
-    border: "none",
-    padding: "12px 20px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    cursor: "pointer",
-  },
-};
