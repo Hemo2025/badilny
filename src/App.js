@@ -21,6 +21,7 @@ export default function App() {
   const [showUpdate, setShowUpdate] = useState(false);
   const [updateUrl, setUpdateUrl] = useState("");
 
+  // ✅ يتأكد أن التطبيق يعمل على جوال وليس على المتصفح
   const isMobileApp =
     Capacitor.getPlatform() === "android" || Capacitor.getPlatform() === "ios";
 
@@ -29,8 +30,10 @@ export default function App() {
 
     const fetchVersion = async () => {
       try {
-        // ✅ استخدم الرابط الكامل للـ version.json على السيرفر
-        const response = await fetch("https://example.com/version.json");
+        // رابط version.json على سيرفرك (Vercel)
+        const response = await fetch(
+          "https://اسم-مشروعك.vercel.app/version.json"
+        );
         const data = await response.json();
         setUpdateUrl(data.updateUrl);
 
