@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";
+import { App as CapacitorApp } from "@capacitor/app"; // ✅ استيراد App
+import semver from "semver"; // ✅ مكتبة للمقارنة الصحيحة بين الإصدارات
 
 import Home from "./pages/Home";
 import Market from "./pages/Market";
@@ -25,23 +27,22 @@ export default function App() {
     Capacitor.getPlatform() === "android" || Capacitor.getPlatform() === "ios";
 
   useEffect(() => {
-    // تحقق من الملف version.json في مجلد public
     const checkVersion = async () => {
-      if (!isMobileApp) return; // فقط للجوال
+      if (!isMobileApp) return;
 
       try {
-        const response = await fetch("/version.json"); // public/version.json
+        // قراءة ملف version.json
+        const response = await fetch("/version.json");
         const data = await response.json();
         const latestVersion = data.latestVersion;
         setUpdateUrl(data.updateUrl);
 
-        // الإصدار الحالي للتطبيق
-        const currentVersion = Capacitor.getAppInfo
-          ? (await Capacitor.getAppInfo()).version
-          : "1.0.0";
+        // الحصول على إصدار التطبيق الحالي من Capacitor
+        const info = await CapacitorApp.getInfo();
+        const currentVersion = info.version;
 
-        // للمحاكاة: تظهر الشاشة إذا currentVersion < latestVersion
-        if (currentVersion < latestVersion) {
+        // مقارنة النسخ باستخدام semver
+        if (semver.lt(currentVersion, latestVersion)) {
           setShowUpdate(true);
         }
       } catch (err) {
