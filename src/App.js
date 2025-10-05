@@ -32,7 +32,7 @@ export default function App() {
       try {
         // رابط version.json على سيرفرك (Vercel)
         const response = await fetch(
-          "https://اسم-مشروعك.vercel.app/version.json"
+          "https://badilny.vercel.app/version.json"
         );
         const data = await response.json();
         setUpdateUrl(data.updateUrl);
