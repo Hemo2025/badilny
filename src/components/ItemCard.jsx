@@ -220,6 +220,7 @@ const cardStyle = {
   boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
   transition: "0.2s",
   position: "relative",
+  height: "-webkit-fill-available",
 };
 const toastStyle = {
   position: "absolute",
